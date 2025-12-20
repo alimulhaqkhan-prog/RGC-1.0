@@ -182,6 +182,8 @@
     .status-line {
       font-size: 0.7rem;
       opacity: 0.7;
+      /* HIDE status text line */
+      display: none;
     }
 
     .input-row {
@@ -224,12 +226,29 @@
       background: #15803d;
     }
 
+    /* Mic button inside input row */
+    .mic-btn {
+      border-radius: 999px;
+      padding: 9px 10px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mic-btn:active {
+      transform: translateY(1px);
+    }
+
     .footer-line {
       font-size: 0.7rem;
       opacity: 0.65;
       margin-top: 2px;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 8px;
       flex-wrap: wrap;
       align-items: center;
@@ -249,30 +268,6 @@
       border-color: #22c55e;
       color: #bbf7d0;
     }
-
-    /* Demo buttons bottom */
-    .bottom-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .demo-btn {
-      flex: 1;
-      border-radius: 999px;
-      padding: 10px 14px;
-      border: none;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-weight: 500;
-      color: #f9fafb;
-    }
-    .demo-btn.negative { background: #b91c1c; }
-    .demo-btn.positive { background: #15803d; }
-    .demo-btn span { font-size: 1rem; }
 
     /* Modals shared */
     .modal-backdrop {
@@ -491,17 +486,6 @@
     input:checked + .slider { background-color: #22c55e; }
     input:checked + .slider:before { transform: translateX(18px); }
 
-    .llm-list {
-      margin-top: 4px;
-      padding: 6px 8px;
-      border-radius: 12px;
-      border: 1px solid #374151;
-      background: #020617;
-      font-size: 0.74rem;
-    }
-    .llm-list ul { padding-left: 18px; margin: 4px 0; }
-    .llm-list li { margin-bottom: 2px; }
-
     .options-footer-note {
       margin-top: 6px;
       font-size: 0.72rem;
@@ -573,22 +557,12 @@
       <div class="input-row">
         <textarea id="userInput"
           placeholder="Write anything… AURA-X Ω will treat it as TM (Temporary Memory)."></textarea>
+        <button class="mic-btn" id="micBtn">🎤</button>
         <button class="send-btn" id="sendBtn">Send</button>
       </div>
       <div class="footer-line">
-        <span>Prototype · TM → LLM(seed) → BM · Self-learning · Equation live.</span>
-        <span>Engine: Seed (local)</span>
         <button id="voiceToggle" class="voice-toggle active">🔊 Voice: On</button>
       </div>
-    </div>
-
-    <div class="bottom-row">
-      <button class="demo-btn negative" id="dogDemoBtn">
-        <span>🐒</span> Dog Bite (Negative Demo)
-      </button>
-      <button class="demo-btn positive" id="childDemoBtn">
-        <span>❤️</span> Lost Child (Positive Demo)
-      </button>
     </div>
   </div>
 
@@ -673,25 +647,6 @@
             <option value="qwen-2-72b">Qwen – Qwen-2-72B</option>
             <option value="deepseek-coder-v2">DeepSeek – DeepSeek-Coder-V2</option>
           </select>
-        </div>
-
-        <div class="llm-list">
-          <div><strong>Example models your backend could use via OpenRouter:</strong></div>
-          <ul>
-            <li>OpenAI – GPT-4.1 / GPT-4o</li>
-            <li>Anthropic – Claude 3.5 Sonnet / Opus</li>
-            <li>Google – Gemini 1.5 Pro</li>
-            <li>Mistral – Mistral Large</li>
-            <li>Cohere – Command-R+</li>
-            <li>xAI – Grok-2</li>
-            <li>Meta – Llama-3-70B-Instruct</li>
-            <li>Qwen – Qwen-2-72B</li>
-            <li>DeepSeek – DeepSeek-Coder-V2</li>
-          </ul>
-          <div style="font-size:0.7rem; opacity:0.8;">
-            The frontend never reveals which exact model is used.
-            It always identifies as the AURA-X Ω artificial resonance reactor.
-          </div>
         </div>
 
         <div class="option-section-title">Prototype controls</div>
@@ -838,6 +793,7 @@
     const modePill=document.getElementById("modePill");
     const reactionBannerEl=document.getElementById("reactionBanner");
     const voiceToggleEl=document.getElementById("voiceToggle");
+    const micBtn = document.getElementById("micBtn");
     let autoVoice = true;
 
     function updateEquationDisplay(){
@@ -1121,21 +1077,18 @@
       }
     });
 
+    // Mic button placeholder (speech-to-text later)
+    if (micBtn) {
+      micBtn.addEventListener("click", () => {
+        alert("Mic input / speech-to-text will be added here in the next version InshaAllah.");
+      });
+    }
+
     // Voice toggle
     voiceToggleEl.addEventListener("click", () => {
       autoVoice = !autoVoice;
       voiceToggleEl.classList.toggle("active", autoVoice);
       voiceToggleEl.textContent = autoVoice ? "🔊 Voice: On" : "🔇 Voice: Off";
-    });
-
-    // Demos
-    document.getElementById("dogDemoBtn").addEventListener("click",()=>{
-      const story="When I was a child in New York, a dog bit me in the snow near a street light. I still remember the cold wind, the barking sound, and my own fear.";
-      handleUserMessage(story);
-    });
-    document.getElementById("childDemoBtn").addEventListener("click",()=>{
-      const story="A lost child was crying in a crowded market until he heard his mother’s voice. She ran to him, hugged him tightly, and both started laughing with tears.";
-      handleUserMessage(story);
     });
 
     // BM Viewer
@@ -1146,7 +1099,7 @@
       bmBody.innerHTML="";
       const keys=Object.keys(bm).sort().reverse();
       if(!keys.length){
-        bmBody.textContent="No Bold Memory stored yet. Share a story or run a demo.";
+        bmBody.textContent="No Bold Memory stored yet. Share a story.";
       }else{
         keys.forEach(k=>{
           const dayDiv=document.createElement("div");
