@@ -1,736 +1,526 @@
 <!DOCTYPE html>
-<html lang="ur">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>IBS Continuity Prototype (AURA-X Ω Base)</title>
+  <title>Symptom → Doctor Summary (AURA-X Ω Prototype)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Nastaliq Urdu", Arial, sans-serif;
-      background: radial-gradient(circle at 20% 0%, #1e293b 0, transparent 45%),
-                  radial-gradient(circle at 80% 0%, #0f172a 0, transparent 55%),
-                  linear-gradient(180deg,#0b1220,#070b14);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 20% 0%, #1e293b 0, transparent 45%),
+        radial-gradient(circle at 80% 0%, #0f172a 0, transparent 55%),
+        linear-gradient(180deg,#020617,#020617);
       color:#e5e7eb;
       padding:16px;
     }
-    .wrap{max-width:1100px;margin:0 auto;display:grid;gap:14px}
+    .wrap{max-width:1000px;margin:0 auto;display:grid;gap:14px}
     .top{
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
-      padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.04);
-      backdrop-filter: blur(8px);
+      padding:14px;border-radius:16px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(15,23,42,.85);backdrop-filter:blur(10px);
+      display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;
     }
-    .brand{display:flex;flex-direction:column;gap:4px}
-    .brand h1{font-size:18px;letter-spacing:.2px}
-    .brand p{font-size:12px;color:#b9c2d0}
-    .caps{
-      display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end
-    }
+    .brand h1{font-size:18px}
+    .brand p{font-size:12px;color:#cbd5e1}
+    .caps{display:flex;flex-wrap:wrap;gap:8px}
     .cap{
-      padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:999px;
-      background:rgba(0,0,0,.20);font-size:12px;color:#dbeafe;white-space:nowrap
+      font-size:12px;padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(148,163,184,.5);
+      background:rgba(15,23,42,.9);color:#e5e7eb;white-space:nowrap;
     }
-    .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:14px}
-    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
-
+    .grid{display:grid;grid-template-columns:1.4fr .9fr;gap:14px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
     .card{
-      padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.04);
-      backdrop-filter: blur(8px);
+      padding:14px;border-radius:16px;
+      border:1px solid rgba(148,163,184,.35);
+      background:rgba(15,23,42,.9);
+      backdrop-filter:blur(8px);
     }
-    .card h2{font-size:14px;margin-bottom:10px;color:#eaf2ff}
-    .muted{color:#b9c2d0;font-size:12px;line-height:1.55}
-    .row{display:grid;grid-template-columns: 1fr 1fr;gap:10px}
-    @media (max-width: 520px){ .row{grid-template-columns:1fr} }
-
-    label{font-size:12px;color:#cbd5e1;display:block;margin:8px 0 6px}
-    input, select, textarea{
-      width:100%;padding:10px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.22);color:#e5e7eb;outline:none
+    .card h2{font-size:14px;margin-bottom:6px}
+    .muted{font-size:12px;color:#cbd5e1;line-height:1.55}
+    label{font-size:12px;color:#e5e7eb;display:block;margin:8px 0 4px}
+    input,select,textarea{
+      width:100%;padding:9px 10px;border-radius:12px;
+      border:1px solid rgba(148,163,184,.6);
+      background:rgba(15,23,42,.95);color:#e5e7eb;font-size:13px;
+      outline:none;
     }
-    textarea{min-height:80px;resize:vertical}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    textarea{min-height:70px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (max-width:520px){.row{grid-template-columns:1fr}}
+    .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
     .chip{
-      border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:7px 10px;
-      background:rgba(0,0,0,.20);font-size:12px;cursor:pointer;user-select:none
+      font-size:11px;padding:6px 9px;border-radius:999px;
+      border:1px solid rgba(148,163,184,.6);
+      background:rgba(15,23,42,.9);cursor:pointer;user-select:none;
     }
-    .chip.on{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.40)}
-    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .chip.on{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.8);color:#e0f2fe}
+    .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
     button{
-      padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);color:#e5e7eb;cursor:pointer;font-size:12px
+      font-size:12px;padding:9px 12px;border-radius:12px;
+      border:1px solid rgba(148,163,184,.7);
+      background:rgba(15,23,42,.95);color:#e5e7eb;cursor:pointer;
     }
-    button.primary{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.35)}
-    button.danger{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.35)}
+    button.primary{background:rgba(34,197,94,.16);border-color:rgba(34,197,94,.7)}
+    button.accent{background:rgba(59,130,246,.18);border-color:rgba(59,130,246,.8)}
+    button.danger{background:rgba(239,68,68,.16);border-color:rgba(239,68,68,.8)}
     button:active{transform:translateY(1px)}
-
-    .list{display:grid;gap:10px;margin-top:10px}
+    .list{display:grid;gap:8px;margin-top:8px}
     .item{
-      border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;
-      background:rgba(0,0,0,.18)
+      border-radius:12px;padding:8px 9px;
+      border:1px solid rgba(148,163,184,.45);
+      background:rgba(15,23,42,.95);font-size:12px;
     }
-    .item .meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:#cbd5e1}
-    .item .meta b{color:#eaf2ff}
-    .item .tags{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+    .item-header{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between}
     .tag{
-      font-size:11px;padding:5px 8px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:#dbeafe
+      font-size:11px;padding:3px 7px;border-radius:999px;
+      border:1px solid rgba(148,163,184,.6);background:rgba(15,23,42,1);
     }
-    .hr{height:1px;background:rgba(255,255,255,.08);margin:10px 0}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New",monospace}
     .small{font-size:11px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand">
-        <h1>IBS Continuity Prototype — AURA-X Ω Base</h1>
-        <p class="muted">Offline • On-device data • Baseline (BM) • Resonance/Decay style flare signal</p>
-      </div>
-      <div class="caps" id="caps">
-        <div class="cap">Entries: <span id="capEntries">0</span></div>
-        <div class="cap">BM Window: <span id="capWindow">21</span> days</div>
-        <div class="cap">E₀ Flare Signal: <span class="mono" id="capE0">0.00</span></div>
-        <div class="cap">Top Trigger: <span id="capTopTrig">—</span></div>
-      </div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <h1>Symptom → Doctor Summary (AURA-X Ω Prototype)</h1>
+      <p class="muted">Ultra-light, on-device, continuity-focused symptom logger that generates a clear summary for clinicians.</p>
     </div>
-
-    <div class="grid">
-      <!-- LEFT: Daily check-in -->
-      <div class="card">
-        <h2>روزانہ IBS چیک اِن (60 سیکنڈ)</h2>
-        <p class="muted">کم سوالات، زیادہ سمجھ: آج کی کیفیت (TM) محفوظ ہوگی، اور سسٹم خود baseline (BM) بنا کر flare signal اور triggers نکالے گا۔</p>
-
-        <div class="row">
-          <div>
-            <label>تاریخ</label>
-            <input type="date" id="date"/>
-          </div>
-          <div>
-            <label>Severity (0–10)</label>
-            <input type="number" id="severity" min="0" max="10" step="1" value="0"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Stool Type (Bristol 1–7)</label>
-            <select id="bristol">
-              <option value="0">—</option>
-              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option>
-            </select>
-          </div>
-          <div>
-            <label>Urgency (0–10)</label>
-            <input type="number" id="urgency" min="0" max="10" step="1" value="0"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Bloating (0–10)</label>
-            <input type="number" id="bloating" min="0" max="10" step="1" value="0"/>
-          </div>
-          <div>
-            <label>Pain/Cramps (0–10)</label>
-            <input type="number" id="pain" min="0" max="10" step="1" value="0"/>
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Sleep (hours)</label>
-            <input type="number" id="sleep" min="0" max="16" step="0.5" value="0"/>
-          </div>
-          <div>
-            <label>Stress (0–10)</label>
-            <input type="number" id="stress" min="0" max="10" step="1" value="0"/>
-          </div>
-        </div>
-
-        <label>Triggers (ایک کلک)</label>
-        <div class="chips" id="triggers"></div>
-
-        <div class="row">
-          <div>
-            <label>Medication / Intervention</label>
-            <input id="med" placeholder="مثلاً: antispasmodic / peppermint oil / ORS"/>
-          </div>
-          <div>
-            <label>Relief (0–10)</label>
-            <input type="number" id="relief" min="0" max="10" step="1" value="0"/>
-          </div>
-        </div>
-
-        <label>Note (optional)</label>
-        <textarea id="note" placeholder="مختصر نوٹ: آج کیا خاص ہوا؟"></textarea>
-
-        <div class="btns">
-          <button class="primary" id="saveBtn">✅ Save Entry</button>
-          <button id="lockRuleBtn">🔒 Lock a Rule (BM)</button>
-          <button id="exportBtn">🧾 Doctor Summary (Text)</button>
-          <button class="danger" id="clearBtn">🗑️ Delete All (Double Confirm)</button>
-        </div>
-
-        <div class="hr"></div>
-        <p class="muted small">
-          نوٹ: یہ prototype کوئی diagnosis نہیں کرتا۔ یہ صرف patterns/observations دکھاتا ہے۔ طبی فیصلے کے لیے clinician سے رابطہ ضروری ہے۔
-        </p>
-      </div>
-
-      <!-- RIGHT: Insights -->
-      <div class="card">
-        <h2>Insights (BM + Resonance + Decay)</h2>
-        <div class="muted" id="insightsText">—</div>
-
-        <div class="hr"></div>
-
-        <h2>Top Triggers (Mining)</h2>
-        <div class="list" id="trigList"></div>
-
-        <div class="hr"></div>
-
-        <h2>Locked Rules (BM)</h2>
-        <div class="list" id="rulesList"></div>
-
-        <div class="hr"></div>
-
-        <h2>History (Recent TM)</h2>
-        <div class="list" id="history"></div>
-      </div>
+    <div class="caps">
+      <div class="cap">Entries: <span id="capEntries">0</span></div>
+      <div class="cap">Days tracked: <span id="capDays">0</span></div>
+      <div class="cap">Avg severity (last 7): <span id="capAvg7" class="mono">0.0</span>/10</div>
     </div>
   </div>
 
-<script>
-(() => {
-  const LS_KEY = "ibs_continuity_entries_v1";
-  const RULES_KEY = "ibs_continuity_rules_v1";
-  const BM_WINDOW_DAYS = 21;
+  <div class="grid">
+    <!-- LEFT: input form -->
+    <div class="card">
+      <h2>Daily Symptom Entry (≈ 30 seconds)</h2>
+      <p class="muted">Keep it very short. The app will convert these fields into a structured summary and basic pattern insight.</p>
 
-  // --- Trigger library (you can expand) ---
+      <div class="row">
+        <div>
+          <label>Date</label>
+          <input type="date" id="date">
+        </div>
+        <div>
+          <label>Symptom type</label>
+          <select id="symptomType">
+            <option value="">Select…</option>
+            <option>Abdominal pain</option>
+            <option>Headache / Migraine</option>
+            <option>Chest discomfort</option>
+            <option>Shortness of breath</option>
+            <option>Joint / back pain</option>
+            <option>IBS / gut flare</option>
+            <option>Fatigue / low energy</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Main symptom description</label>
+      <input id="description" placeholder="e.g., Crampy lower abdominal pain with urgent bowel movements">
+
+      <div class="row">
+        <div>
+          <label>Severity (0–10)</label>
+          <input type="number" id="severity" min="0" max="10" step="1" value="0">
+        </div>
+        <div class="row" style="grid-template-columns:1.1fr .9fr;gap:6px">
+          <div>
+            <label>Duration</label>
+            <input id="duration" placeholder="e.g., 45" />
+          </div>
+          <div>
+            <label>Unit</label>
+            <select id="durationUnit">
+              <option>minutes</option>
+              <option>hours</option>
+              <option>days</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <label>Possible triggers (tap to toggle)</label>
+      <div class="chips" id="triggers"></div>
+      <label>Other trigger (optional)</label>
+      <input id="triggerOther" placeholder="e.g., spicy food at night">
+
+      <div class="row">
+        <div>
+          <label>Medication / treatment used</label>
+          <input id="medication" placeholder="e.g., antispasmodic, paracetamol, rest">
+        </div>
+        <div>
+          <label>Relief from treatment (0–10)</label>
+          <input type="number" id="relief" min="0" max="10" step="1" value="0">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Impact on daily activities</label>
+          <select id="impact">
+            <option value="">Select…</option>
+            <option>None</option>
+            <option>Mild – I continued most activities</option>
+            <option>Moderate – I slowed down / rested</option>
+            <option>Severe – I had to stop normal activities</option>
+          </select>
+        </div>
+        <div>
+          <label>Associated symptoms (short)</label>
+          <input id="associated" placeholder="e.g., nausea, bloating, dizziness">
+        </div>
+      </div>
+
+      <label>Notes for doctor (optional)</label>
+      <textarea id="notes" placeholder="Anything the clinician should know – recent changes, worries, context."></textarea>
+
+      <div class="btns">
+        <button class="primary" id="saveBtn">Save entry</button>
+        <button class="accent" id="summaryBtn">Generate doctor summary</button>
+        <button class="danger" id="clearBtn">Delete all data (double confirm)</button>
+      </div>
+
+      <p class="muted small" style="margin-top:10px;">
+        This prototype does not provide medical advice or diagnosis. It only helps to organize your own symptom information for discussion with a clinician.
+      </p>
+    </div>
+
+    <!-- RIGHT: history & quick patterns -->
+    <div class="card">
+      <h2>Recent entries & quick patterns</h2>
+      <div class="muted" id="patternText">No data yet. Add a few entries to see patterns.</div>
+      <div class="list" id="history"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const LS_KEY = "symptom_summary_entries_v1";
   const TRIGGERS = [
-    "Spicy food", "Dairy", "Gluten", "FODMAP (high)", "Caffeine", "Carbonated drinks",
-    "Late dinner", "Irregular meals", "Dehydration", "Low sleep", "High stress",
-    "Travel", "Screen time", "Smoking", "New medication", "Infection/Flu"
+    "Stress",
+    "Lack of sleep",
+    "Certain food / meal",
+    "Late meal",
+    "Dehydration",
+    "Menstrual cycle",
+    "Weather change",
+    "Intense exercise",
+    "Prolonged sitting",
+    "New medication",
+    "Infection / flu",
+    "Travel",
+    "Screen time",
+    "Unknown"
   ];
 
-  // --- Helpers ---
-  const $ = (id) => document.getElementById(id);
-  const clamp01 = (x) => Math.max(0, Math.min(1, x));
-  const toNum = (v) => (v === "" || v === null || v === undefined) ? 0 : Number(v);
-  const fmt2 = (x) => (Math.round(x * 100) / 100).toFixed(2);
-
-  function todayISO(){
+  const $ = id => document.getElementById(id);
+  const todayISO = () => {
     const d = new Date();
     const off = d.getTimezoneOffset();
-    const local = new Date(d.getTime() - off * 60 * 1000);
+    const local = new Date(d.getTime() - off*60000);
     return local.toISOString().slice(0,10);
+  };
+  const toNum = v => (v === "" || v == null) ? 0 : Number(v);
+  const fmt1 = x => (Math.round(x*10)/10).toFixed(1);
+
+  function escapeHtml(str){
+    return String(str ?? "").replace(/[&<>"']/g, m => (
+      { "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]
+    ));
   }
 
   function loadEntries(){
-    try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }
-    catch { return []; }
+    try{ return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); }
+    catch{ return []; }
   }
   function saveEntries(arr){
     localStorage.setItem(LS_KEY, JSON.stringify(arr));
   }
 
-  function loadRules(){
-    try { return JSON.parse(localStorage.getItem(RULES_KEY) || "[]"); }
-    catch { return []; }
-  }
-  function saveRules(arr){
-    localStorage.setItem(RULES_KEY, JSON.stringify(arr));
-  }
-
-  // --- Baseline (BM) ---
-  function withinWindow(dateStr){
-    const d = new Date(dateStr + "T00:00:00");
-    const now = new Date();
-    const diffDays = Math.floor((now - d) / (1000*60*60*24));
-    return diffDays >= 0 && diffDays <= BM_WINDOW_DAYS;
-  }
-
-  function computeBaseline(entries){
-    const win = entries.filter(e => withinWindow(e.date));
-    if(win.length === 0){
-      return { n:0, sev:0, urg:0, blo:0, pain:0, sleep:0, stress:0, bristol:0 };
-    }
-    const avg = (k) => win.reduce((s,e)=>s+toNum(e[k]),0)/win.length;
-    return {
-      n: win.length,
-      sev: avg("severity"),
-      urg: avg("urgency"),
-      blo: avg("bloating"),
-      pain: avg("pain"),
-      sleep: avg("sleep"),
-      stress: avg("stress"),
-      bristol: avg("bristol")
-    };
-  }
-
-  // --- Resonance/Deviation + Decay style flare signal ---
-  // Deviation normalized (0..1); higher deviation = higher flare
-  function computeDeviation(entry, bm){
-    // weights tuned for IBS symptoms
-    const w = {
-      severity: 0.24,
-      pain: 0.18,
-      bloating: 0.16,
-      urgency: 0.14,
-      stress: 0.10,
-      sleep: 0.10,
-      bristol: 0.08
-    };
-
-    const norm10 = (x) => clamp01(toNum(x)/10);
-    const normSleep = (h) => {
-      // baseline around 7.5; less sleep increases deviation
-      const hh = toNum(h);
-      const d = (7.5 - hh) / 7.5; // if hh=0 => 1, if hh=7.5 =>0, if >7.5 => negative -> clamp
-      return clamp01(d);
-    };
-    const normBristol = (b) => {
-      const bb = toNum(b);
-      if(!bb) return 0;
-      // 4 is "normal"; distance from 4 scaled
-      return clamp01(Math.abs(bb - 4) / 3);
-    };
-
-    const dev =
-      w.severity * clamp01(Math.abs(norm10(entry.severity) - norm10(bm.sev))) +
-      w.pain     * clamp01(Math.abs(norm10(entry.pain)     - norm10(bm.pain))) +
-      w.bloating * clamp01(Math.abs(norm10(entry.bloating) - norm10(bm.blo))) +
-      w.urgency  * clamp01(Math.abs(norm10(entry.urgency)  - norm10(bm.urg))) +
-      w.stress   * clamp01(Math.abs(norm10(entry.stress)   - norm10(bm.stress))) +
-      w.sleep    * clamp01(Math.abs(normSleep(entry.sleep) - normSleep(bm.sleep))) +
-      w.bristol  * clamp01(Math.abs(normBristol(entry.bristol) - normBristol(bm.bristol)));
-
-    return clamp01(dev);
-  }
-
-  function timeDecayFactor(dateStr){
-    // newer entries more weight; older fade (D)
-    const d = new Date(dateStr + "T00:00:00");
-    const now = new Date();
-    const days = Math.max(0, Math.floor((now - d)/(1000*60*60*24)));
-    // half-life ~ 7 days in window
-    const halfLife = 7;
-    const factor = Math.pow(0.5, days/halfLife);
-    return clamp01(factor);
-  }
-
-  function computeE0(entries, bm){
-    if(entries.length === 0) return 0;
-    // use last 7 entries weighted by decay
-    const sorted = [...entries].sort((a,b)=> (a.date<b.date?1:-1));
-    const recent = sorted.slice(0,7);
-    let num = 0, den = 0;
-    for(const e of recent){
-      const dev = computeDeviation(e, bm);
-      const w = timeDecayFactor(e.date);
-      // E0 higher when deviation high
-      num += dev * w;
-      den += w;
-    }
-    const raw = den ? (num/den) : 0;
-    // soft boost if severity high today
-    const today = sorted[0];
-    const boost = clamp01(toNum(today.severity)/10) * 0.10;
-    return clamp01(raw + boost);
-  }
-
-  // --- Trigger Mining ---
-  function mineTriggers(entries){
-    const counts = new Map();
-    const flareCounts = new Map();
-
-    // define "flare day" threshold relative to baseline
-    // if severity >= bm.sev + 2 OR deviation >= 0.55 treat as flare
-    const bm = computeBaseline(entries);
-    for(const e of entries){
-      const t = (e.triggers || []);
-      if(!t.length) continue;
-      for(const trig of t){
-        counts.set(trig, (counts.get(trig)||0)+1);
-      }
-      const dev = computeDeviation(e, bm);
-      const isFlare = (toNum(e.severity) >= (bm.sev + 2)) || (dev >= 0.55);
-      if(isFlare){
-        for(const trig of t){
-          flareCounts.set(trig, (flareCounts.get(trig)||0)+1);
-        }
-      }
-    }
-
-    // score: flareRate with smoothing
-    const rows = [];
-    for(const [trig, c] of counts.entries()){
-      const f = flareCounts.get(trig)||0;
-      const rate = (f + 1) / (c + 2); // Laplace smoothing
-      rows.push({ trig, total:c, flare:f, rate });
-    }
-    rows.sort((a,b)=> b.rate - a.rate || b.flare - a.flare || b.total - a.total);
-    return rows.slice(0,10);
-  }
-
-  // --- UI init triggers chips ---
-  function initChips(){
+  function initTriggers(){
     const wrap = $("triggers");
     wrap.innerHTML = "";
-    TRIGGERS.forEach(t => {
-      const el = document.createElement("div");
-      el.className = "chip";
-      el.textContent = t;
-      el.onclick = () => el.classList.toggle("on");
-      wrap.appendChild(el);
+    TRIGGERS.forEach(label => {
+      const div = document.createElement("div");
+      div.className = "chip";
+      div.textContent = label;
+      div.onclick = () => div.classList.toggle("on");
+      wrap.appendChild(div);
     });
   }
-
-  function getSelectedTriggers(){
+  function selectedTriggers(){
     const chips = [...document.querySelectorAll("#triggers .chip.on")];
     return chips.map(c => c.textContent);
   }
-  function clearSelectedTriggers(){
-    [...document.querySelectorAll("#triggers .chip.on")].forEach(c=>c.classList.remove("on"));
+  function clearTriggerSelection(){
+    document.querySelectorAll("#triggers .chip.on").forEach(c => c.classList.remove("on"));
   }
 
-  // --- Render functions ---
-  function render(){
-    const entries = loadEntries();
-    const rules = loadRules();
-    const bm = computeBaseline(entries);
-    const e0 = computeE0(entries, bm);
-    const trigRows = mineTriggers(entries);
-
-    $("capEntries").textContent = entries.length;
-    $("capWindow").textContent = BM_WINDOW_DAYS;
-    $("capE0").textContent = fmt2(e0);
-    $("capTopTrig").textContent = trigRows[0]?.trig || "—";
-
-    // Insights text
-    const insight = buildInsights(entries, bm, e0, trigRows);
-    $("insightsText").innerHTML = insight;
-
-    // Trigger list
-    const tl = $("trigList");
-    tl.innerHTML = "";
-    if(trigRows.length === 0){
-      tl.innerHTML = `<div class="muted">ابھی triggers کافی نہیں۔ 5–7 دن entries کے بعد یہ حصہ meaningful ہو جائے گا۔</div>`;
-    }else{
-      trigRows.forEach(r => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="meta">
-            <b>${escapeHtml(r.trig)}</b>
-            <span>Score: <span class="mono">${fmt2(r.rate)}</span></span>
-            <span>Total: <span class="mono">${r.total}</span></span>
-            <span>Flare-days: <span class="mono">${r.flare}</span></span>
-          </div>
-          <div class="muted small">Score = flare ratio (smoothing کے ساتھ) — زیادہ score مطلب یہ trigger اکثر flare کے ساتھ آیا۔</div>
-        `;
-        tl.appendChild(div);
-      });
-    }
-
-    // Rules list
-    const rl = $("rulesList");
-    rl.innerHTML = "";
-    if(!rules.length){
-      rl.innerHTML = `<div class="muted">ابھی کوئی locked rule نہیں۔ “Lock a Rule” سے اہم patterns محفوظ کریں۔</div>`;
-    }else{
-      rules.slice().reverse().forEach((r, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="meta">
-            <b>🔒 ${escapeHtml(r.title)}</b>
-            <span class="muted">(${escapeHtml(r.date)})</span>
-          </div>
-          <div class="muted small">${escapeHtml(r.detail || "")}</div>
-          <div class="btns" style="margin-top:8px">
-            <button class="danger" data-del-rule="${r.id}">Delete Rule</button>
-          </div>
-        `;
-        rl.appendChild(div);
-      });
-      // bind delete
-      rl.querySelectorAll("button[data-del-rule]").forEach(btn=>{
-        btn.onclick = () => {
-          const id = btn.getAttribute("data-del-rule");
-          const ok = confirm("کیا واقعی یہ rule delete کرنا ہے؟");
-          if(!ok) return;
-          const ok2 = confirm("دوبارہ confirm: delete rule?");
-          if(!ok2) return;
-          const arr = loadRules().filter(x => x.id !== id);
-          saveRules(arr);
-          render();
-        };
-      });
-    }
-
-    // History
-    const hist = $("history");
-    hist.innerHTML = "";
-    const sorted = entries.slice().sort((a,b)=> (a.date<b.date?1:-1)).slice(0,12);
-    if(!sorted.length){
-      hist.innerHTML = `<div class="muted">ابھی کوئی entry نہیں۔ بائیں طرف “Save Entry” کریں۔</div>`;
-    }else{
-      sorted.forEach(e=>{
-        const div = document.createElement("div");
-        div.className = "item";
-        const tags = (e.triggers||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join("");
-        div.innerHTML = `
-          <div class="meta">
-            <b>${escapeHtml(e.date)}</b>
-            <span>Sev: <span class="mono">${toNum(e.severity)}</span></span>
-            <span>Pain: <span class="mono">${toNum(e.pain)}</span></span>
-            <span>Bloat: <span class="mono">${toNum(e.bloating)}</span></span>
-            <span>Urg: <span class="mono">${toNum(e.urgency)}</span></span>
-          </div>
-          <div class="tags">${tags || `<span class="muted small">No triggers selected</span>`}</div>
-          <div class="muted small" style="margin-top:6px">
-            Sleep: <span class="mono">${toNum(e.sleep)}</span>h • Stress: <span class="mono">${toNum(e.stress)}</span>
-            ${e.med ? ` • Med: <span class="mono">${escapeHtml(e.med)}</span> (Relief ${toNum(e.relief)}/10)` : ""}
-          </div>
-          ${e.note ? `<div class="muted small" style="margin-top:6px">Note: ${escapeHtml(e.note)}</div>` : ""}
-          <div class="btns" style="margin-top:8px">
-            <button class="danger" data-del="${escapeHtml(e.id)}">Delete Entry</button>
-          </div>
-        `;
-        hist.appendChild(div);
-      });
-      hist.querySelectorAll("button[data-del]").forEach(btn=>{
-        btn.onclick = () => {
-          const id = btn.getAttribute("data-del");
-          const ok = confirm("کیا واقعی یہ entry delete کرنا ہے؟");
-          if(!ok) return;
-          const ok2 = confirm("دوبارہ confirm: delete entry?");
-          if(!ok2) return;
-          const arr = loadEntries().filter(x => x.id !== id);
-          saveEntries(arr);
-          render();
-        };
-      });
-    }
-  }
-
-  function buildInsights(entries, bm, e0, trigRows){
-    if(entries.length === 0){
-      return `ابھی کوئی data نہیں۔ <b>1–3 دن</b> entries کے بعد baseline بننا شروع ہو جائے گا، اور <b>7+ دن</b> کے بعد triggers meaningful ہو جائیں گے۔`;
-    }
-    const sorted = entries.slice().sort((a,b)=> (a.date<b.date?1:-1));
-    const t = sorted[0];
-
-    // simple narrative
-    const sev = toNum(t.severity);
-    const pain = toNum(t.pain);
-    const blo = toNum(t.bloating);
-    const urg = toNum(t.urgency);
-
-    const bmLine = (bm.n>=3)
-      ? `BM (آخری ${BM_WINDOW_DAYS} دن): Severity <span class="mono">${fmt2(bm.sev)}</span>, Pain <span class="mono">${fmt2(bm.pain)}</span>, Bloating <span class="mono">${fmt2(bm.blo)}</span>, Urgency <span class="mono">${fmt2(bm.urg)}</span>.`
-      : `Baseline ابھی کمزور ہے (کم از کم 3 entries چاہئیں)۔`;
-
-    let level = "Low";
-    if(e0 >= 0.70) level = "High";
-    else if(e0 >= 0.45) level = "Moderate";
-
-    const top = trigRows[0]?.trig ? `Top trigger (اب تک): <b>${escapeHtml(trigRows[0].trig)}</b>.` : `Top trigger ابھی واضح نہیں۔`;
-
-    // flare hints (non-diagnostic)
-    const hints = [];
-    if(sev >= bm.sev + 2 && bm.n >= 3) hints.push("آج Severity baseline سے واضح زیادہ ہے—یہ flare pattern ہو سکتا ہے۔");
-    if(t.sleep && toNum(t.sleep) < 6) hints.push("نیند کم ہے—IBS میں یہ اکثر flare کو بڑھاتی ہے۔");
-    if(t.stress && toNum(t.stress) >= 7) hints.push("Stress کافی زیادہ ہے—اسے cause tag کے طور پر track کریں۔");
-    if(urg >= 7) hints.push("Urgency high ہے—hydration + food timing نوٹ کریں۔");
-
-    const hintHtml = hints.length ? `<ul style="margin-top:8px;padding-left:18px">${hints.map(h=>`<li class="muted">${escapeHtml(h)}</li>`).join("")}</ul>` : "";
-
-    return `
-      <div>
-        <div><b>Today:</b> Sev <span class="mono">${sev}</span>, Pain <span class="mono">${pain}</span>, Bloat <span class="mono">${blo}</span>, Urg <span class="mono">${urg}</span></div>
-        <div class="muted" style="margin-top:6px">${bmLine}</div>
-        <div style="margin-top:8px">E₀ Flare Signal: <b class="mono">${fmt2(e0)}</b> (<b>${level}</b>)</div>
-        <div class="muted" style="margin-top:6px">${top}</div>
-        ${hintHtml}
-        <div class="muted small" style="margin-top:10px">یہ observations ہیں، diagnosis نہیں۔ اگر symptoms شدید/خطرناک ہوں تو clinician سے رابطہ کریں۔</div>
-      </div>
-    `;
-  }
-
-  function escapeHtml(s){
-    return String(s ?? "").replace(/[&<>"']/g, (m)=>({
-      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
-    }[m]));
-  }
-
-  // --- Actions ---
   function readForm(){
     return {
       id: crypto.randomUUID(),
       date: $("date").value || todayISO(),
+      symptomType: $("symptomType").value,
+      description: $("description").value.trim(),
       severity: toNum($("severity").value),
-      bristol: toNum($("bristol").value),
-      urgency: toNum($("urgency").value),
-      bloating: toNum($("bloating").value),
-      pain: toNum($("pain").value),
-      sleep: toNum($("sleep").value),
-      stress: toNum($("stress").value),
-      triggers: getSelectedTriggers(),
-      med: $("med").value.trim(),
+      duration: $("duration").value.trim(),
+      durationUnit: $("durationUnit").value,
+      triggers: selectedTriggers(),
+      triggerOther: $("triggerOther").value.trim(),
+      medication: $("medication").value.trim(),
       relief: toNum($("relief").value),
-      note: $("note").value.trim()
+      impact: $("impact").value,
+      associated: $("associated").value.trim(),
+      notes: $("notes").value.trim()
     };
   }
 
   function resetForm(){
     $("date").value = todayISO();
-    ["severity","urgency","bloating","pain","sleep","stress","relief"].forEach(id => $(id).value = 0);
-    $("bristol").value = "0";
-    $("med").value = "";
-    $("note").value = "";
-    clearSelectedTriggers();
+    $("symptomType").value = "";
+    $("description").value = "";
+    $("severity").value = 0;
+    $("duration").value = "";
+    $("durationUnit").value = "minutes";
+    $("triggerOther").value = "";
+    $("medication").value = "";
+    $("relief").value = 0;
+    $("impact").value = "";
+    $("associated").value = "";
+    $("notes").value = "";
+    clearTriggerSelection();
   }
 
   function saveEntry(){
     const e = readForm();
+    if(!e.symptomType && !e.description){
+      alert("Please enter at least a symptom type or a short description.");
+      return;
+    }
     const entries = loadEntries();
-
-    // replace entry if same date exists (keep one per day)
+    // If same date already exists, replace that entry
     const idx = entries.findIndex(x => x.date === e.date);
     if(idx >= 0){
-      // preserve id for consistent deletion links (optional)
       e.id = entries[idx].id || e.id;
       entries[idx] = e;
     }else{
       entries.push(e);
     }
-
-    // keep sorted and limit (optional)
-    entries.sort((a,b)=> (a.date>b.date?1:-1));
-    // keep last 365 days
-    const pruned = entries.slice(-365);
-
-    saveEntries(pruned);
-    resetForm();
+    entries.sort((a,b)=> (a.date > b.date ? 1 : -1));
+    saveEntries(entries);
     render();
     alert("Entry saved ✅");
   }
 
-  function lockRule(){
-    const entries = loadEntries();
-    if(entries.length < 3){
-      alert("Rule lock کے لیے کم از کم 3 entries ضروری ہیں۔");
-      return;
-    }
-    const title = prompt("Rule title لکھیں (مثلاً: 'Spicy + Late Dinner → flare'):");
-    if(!title) return;
-    const detail = prompt("تفصیل (optional): یہ rule کیسے پتا چلا؟ کیا observe کیا؟") || "";
-
-    const rules = loadRules();
-    rules.push({ id: crypto.randomUUID(), date: todayISO(), title, detail });
-    saveRules(rules);
+  function deleteAll(){
+    const ok = confirm("Delete all saved entries?");
+    if(!ok) return;
+    const ok2 = confirm("This cannot be undone. Really delete everything?");
+    if(!ok2) return;
+    localStorage.removeItem(LS_KEY);
     render();
-    alert("Rule locked 🔒");
+    alert("All data deleted.");
   }
 
-  function exportSummary(){
+  function render(){
+    $("date").value = todayISO();
     const entries = loadEntries();
-    if(!entries.length){
-      alert("Export کے لیے data موجود نہیں۔");
+    $("capEntries").textContent = entries.length;
+
+    if(entries.length === 0){
+      $("capDays").textContent = 0;
+      $("capAvg7").textContent = "0.0";
+      $("patternText").textContent = "No data yet. Add a few entries to see patterns.";
+      $("history").innerHTML = "";
       return;
     }
-    const bm = computeBaseline(entries);
-    const e0 = computeE0(entries, bm);
-    const tr = mineTriggers(entries);
 
-    const sorted = entries.slice().sort((a,b)=> (a.date<b.date?1:-1));
-    const last30 = sorted.filter(e => {
-      const d = new Date(e.date + "T00:00:00");
-      const now = new Date();
-      const days = Math.floor((now - d)/(1000*60*60*24));
-      return days >= 0 && days <= 30;
+    const sorted = entries.slice().sort((a,b)=> (a.date > b.date ? 1 : -1));
+    const firstDate = new Date(sorted[0].date + "T00:00:00");
+    const lastDate = new Date(sorted[sorted.length-1].date + "T00:00:00");
+    const diffDays = Math.floor((lastDate - firstDate)/(1000*60*60*24))+1;
+    $("capDays").textContent = diffDays;
+
+    const last7 = sorted.slice(-7);
+    const avg7 = last7.reduce((s,e)=> s + toNum(e.severity), 0) / last7.length;
+    $("capAvg7").textContent = fmt1(avg7 || 0);
+
+    // simple pattern text
+    const severeDays = last7.filter(e => toNum(e.severity) >= 7).length;
+    const mildDays = last7.filter(e => toNum(e.severity) <= 3).length;
+
+    // trigger frequency
+    const trigCount = {};
+    for(const e of sorted){
+      (e.triggers || []).forEach(t => {
+        trigCount[t] = (trigCount[t] || 0) + 1;
+      });
+      if(e.triggerOther){
+        trigCount[e.triggerOther] = (trigCount[e.triggerOther] || 0) + 1;
+      }
+    }
+    const topTriggers = Object.entries(trigCount)
+      .sort((a,b)=> b[1]-a[1])
+      .slice(0,3)
+      .map(([t,c]) => `${t} (${c})`)
+      .join(", ");
+
+    let p = `Last ${last7.length} entries: average severity ${fmt1(avg7 || 0)}/10. `;
+    if(severeDays > 0) p += `${severeDays} day(s) were high (≥7/10). `;
+    if(mildDays > 0) p += `${mildDays} day(s) were mild (≤3/10). `;
+    if(topTriggers) p += `Most frequent triggers: ${topTriggers}.`;
+    $("patternText").textContent = p;
+
+    // history list (last 10)
+    const histWrap = $("history");
+    histWrap.innerHTML = "";
+    const recent = sorted.slice(-10).reverse();
+    recent.forEach(e => {
+      const div = document.createElement("div");
+      div.className = "item";
+      const trigTags = [
+        ...(e.triggers || []),
+        ...(e.triggerOther ? [e.triggerOther] : [])
+      ];
+      div.innerHTML = `
+        <div class="item-header">
+          <div><strong>${escapeHtml(e.date)}</strong> – ${escapeHtml(e.symptomType || "Symptom")}</div>
+          <div class="small">Severity: <span class="mono">${toNum(e.severity)}</span>/10</div>
+        </div>
+        <div class="small" style="margin-top:4px">
+          ${escapeHtml(e.description || "")}
+        </div>
+        ${trigTags.length ? `
+        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">
+          ${trigTags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+        </div>` : ""}
+        <div class="small muted" style="margin-top:4px">
+          ${e.medication ? `Treatment: ${escapeHtml(e.medication)} (relief ${toNum(e.relief)}/10). ` : ""}
+          ${e.impact ? `Impact: ${escapeHtml(e.impact)}.` : ""}
+        </div>
+      `;
+      histWrap.appendChild(div);
     });
+  }
 
-    const flareDays = last30.filter(e => {
-      const dev = computeDeviation(e, bm);
-      return (toNum(e.severity) >= (bm.sev + 2)) || (dev >= 0.55);
-    });
+  function generateSummary(){
+    const entries = loadEntries();
+    const current = readForm(); // use current values as "today", even if not saved
 
-    const top5 = tr.slice(0,5).map(r => `- ${r.trig} (score ${fmt2(r.rate)}, flare ${r.flare}/${r.total})`).join("\n") || "- (insufficient data)";
+    if(!current.symptomType && !current.description){
+      if(entries.length === 0){
+        alert("Please enter at least one symptom entry before generating a summary.");
+        return;
+      }
+    }
+
+    const sorted = entries.slice().sort((a,b)=> (a.date > b.date ? 1 : -1));
+    const last7 = sorted.slice(-7);
+    const avg7 = last7.length
+      ? last7.reduce((s,e)=> s + toNum(e.severity), 0)/last7.length
+      : 0;
+    const severeDays = last7.filter(e => toNum(e.severity) >= 7).length;
+
+    const trigCount = {};
+    for(const e of sorted){
+      (e.triggers || []).forEach(t => { trigCount[t] = (trigCount[t] || 0) + 1; });
+      if(e.triggerOther){ trigCount[e.triggerOther] = (trigCount[e.triggerOther] || 0) + 1; }
+    }
+    const topTriggers = Object.entries(trigCount)
+      .sort((a,b)=> b[1]-a[1])
+      .slice(0,5)
+      .map(([t,c]) => `- ${t} (${c} day(s))`)
+      .join("\n") || "- Not enough data yet";
 
     const meds = {};
-    for(const e of last30){
-      if(e.med){
-        const key = e.med.trim();
-        meds[key] = meds[key] || { n:0, relief:0 };
+    for(const e of sorted){
+      if(e.medication){
+        const key = e.medication.trim();
+        meds[key] = meds[key] || {n:0,totalRelief:0};
         meds[key].n += 1;
-        meds[key].relief += toNum(e.relief);
+        meds[key].totalRelief += toNum(e.relief);
       }
     }
     const medLines = Object.keys(meds).length
-      ? Object.entries(meds).map(([k,v]) => `- ${k}: uses ${v.n}, avg relief ${fmt2(v.relief/v.n)}/10`).join("\n")
-      : "- (no meds logged)";
+      ? Object.entries(meds).map(([name,info]) =>
+          `- ${name}: used on ${info.n} day(s), average relief ${fmt1(info.totalRelief/info.n)}/10`
+        ).join("\n")
+      : "- No medications logged yet";
+
+    const c = current;
+    const dateLine = c.date || todayISO();
+
+    const trigLine = (() => {
+      const merged = [
+        ...(c.triggers || []),
+        ...(c.triggerOther ? [c.triggerOther] : [])
+      ];
+      return merged.length ? merged.join(", ") : "None clearly identified today.";
+    })();
 
     const txt =
-`IBS Continuity Summary (Prototype)
-Date: ${todayISO()}
+`Symptom Summary for Clinician (Prototype – AURA-X Ω continuity model)
+Date of this entry: ${dateLine}
 
-Data window:
-- Total entries: ${entries.length}
-- Last 30 days entries: ${last30.length}
-- Flare-like days (pattern): ${flareDays.length}
+1. Today's main symptom
+- Type: ${c.symptomType || "Not specified"}
+- Description: ${c.description || "Not provided"}
+- Severity: ${toNum(c.severity)}/10
+- Duration: ${c.duration ? `${c.duration} ${c.durationUnit}` : "Not specified"}
+- Impact on daily activities: ${c.impact || "Not specified"}
+- Associated symptoms: ${c.associated || "Not specified"}
 
-Baseline (BM, last ${BM_WINDOW_DAYS} days):
-- Severity: ${fmt2(bm.sev)} /10
-- Pain: ${fmt2(bm.pain)} /10
-- Bloating: ${fmt2(bm.blo)} /10
-- Urgency: ${fmt2(bm.urg)} /10
-- Sleep: ${fmt2(bm.sleep)} hours
-- Stress: ${fmt2(bm.stress)} /10
+2. Possible triggers today
+- ${trigLine}
 
-Today signal:
-- E₀ Flare Signal (0..1): ${fmt2(e0)}  (higher means deviation from baseline)
+3. Treatment taken today
+- Medication / intervention: ${c.medication || "None recorded"}
+- Subjective relief: ${toNum(c.relief)}/10
 
-Top triggers (mined):
-${top5}
+4. Short free-text note from patient
+- ${c.notes || "No additional note provided."}
 
-Medication / Intervention effectiveness:
+5. Pattern overview (based on saved entries)
+- Total saved entries: ${entries.length}
+- Average severity over last ${last7.length || 0} entry/entries: ${fmt1(avg7)}/10
+- Number of high-severity days (≥7/10) in last ${last7.length || 0}: ${severeDays}
+- Most frequent triggers so far:
+${topTriggers}
+
+6. Medication effectiveness (approximate)
 ${medLines}
 
-Notes:
-- This is NOT a diagnosis. Observations/patterns only.
-- Please consult clinician for medical decisions.
+Important disclaimer:
+- This summary is generated to help structure the conversation with a clinician.
+- It is not a diagnosis or a treatment recommendation.
+- All medical decisions should be made by a qualified health professional.
 `;
 
-    // show in a simple modal using prompt-like copy
     const w = window.open("", "_blank");
-    w.document.write(`<pre style="white-space:pre-wrap;font-family:ui-monospace,monospace;padding:16px;background:#0b1220;color:#e5e7eb">${escapeHtml(txt)}</pre>`);
-    w.document.title = "IBS Summary";
+    w.document.write(`
+      <pre style="white-space:pre-wrap;font-family:ui-monospace,monospace;background:#020617;color:#e5e7eb;padding:16px;">
+${escapeHtml(txt)}
+      </pre>
+    `);
+    w.document.title = "Symptom Summary";
   }
 
-  function clearAll(){
-    const ok = confirm("کیا واقعی سارا data delete کرنا ہے؟");
-    if(!ok) return;
-    const ok2 = confirm("دوبارہ confirm: Delete ALL entries & rules?");
-    if(!ok2) return;
-    localStorage.removeItem(LS_KEY);
-    localStorage.removeItem(RULES_KEY);
-    render();
-    alert("All data deleted ✅");
-  }
-
-  // --- Wire up ---
   $("saveBtn").onclick = saveEntry;
-  $("lockRuleBtn").onclick = lockRule;
-  $("exportBtn").onclick = exportSummary;
-  $("clearBtn").onclick = clearAll;
+  $("clearBtn").onclick = deleteAll;
+  $("summaryBtn").onclick = generateSummary;
 
-  // init
   $("date").value = todayISO();
-  initChips();
+  initTriggers();
   render();
 })();
 </script>
