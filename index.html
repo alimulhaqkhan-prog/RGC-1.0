@@ -4,530 +4,564 @@
   <meta charset="UTF-8" />
   <title>AURA-X Ω – Offline Emotional Continuity Prototype</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Offline LLM package (WebLLM – placeholder, ready for wiring) -->
+  <!-- Offline LLM package (WebLLM, for in-browser models – future ready) -->
   <script type="module">
     import * as webllm from "https://esm.run/@mlc-ai/web-llm";
     window.webllm = webllm;
   </script>
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root {
+      --accent-color: #0ea5e9; /* default accent */
     }
-
-    body {
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    body{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:
         radial-gradient(circle at 20% 0%, #1e293b 0, transparent 45%),
         radial-gradient(circle at 80% 0, #0ea5e9 0, transparent 40%),
         linear-gradient(145deg,#020617 0,#020617 40%,#020617 100%);
-      color: #e5e7eb;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 18px 10px;
+      color:#e5e7eb;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:18px 10px;
+    }
+    .app{
+      width:min(980px,98vw);
+      background:rgba(2,6,23,.45);
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.45);
+      backdrop-filter:blur(10px);
+    }
+    .top{
+      padding:20px 18px 10px;
+      border-bottom:1px solid rgba(148,163,184,.14);
+      text-align:center;
+    }
+    .brand{
+      font-weight:800;
+      letter-spacing:.5px;
+      font-size:26px;
+      color:#7dd3fc;
+      text-shadow:0 0 22px rgba(14,165,233,.28);
+    }
+    .sub{
+      opacity:.8;
+      margin-top:2px;
+      font-size:13px;
+    }
+    .ethic{
+      margin:14px auto 12px;
+      max-width:720px;
+      border:1px solid rgba(251,191,36,.35);
+      border-radius:14px;
+      padding:12px 14px;
+      color:#fbbf24;
+      background:rgba(2,6,23,.35);
+      box-shadow:inset 0 0 0 1px rgba(251,191,36,.08);
+      font-size:14px;
+      line-height:1.45;
+    }
+    .pill{
+      margin:10px auto 0;
+      max-width:760px;
+      background:linear-gradient(90deg, rgba(14,165,233,.65), rgba(34,211,238,.45));
+      border:1px solid rgba(125,211,252,.30);
+      color:#0b1220;
+      font-weight:800;
+      letter-spacing:.6px;
+      border-radius:999px;
+      padding:14px 16px;
+      text-transform:uppercase;
+      box-shadow:0 12px 40px rgba(14,165,233,.22);
+    }
+    .main{ padding:16px 16px 18px }
+    .row{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch}
+    .leftCol{ flex:1 1 340px; min-width:300px }
+    .rightCol{ flex:1 1 360px; min-width:320px }
+    .card{
+      background:rgba(2,6,23,.50);
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter:blur(10px);
+    }
+    .optionsBtn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(15,23,42,.55);
+      color:#e5e7eb;
+      cursor:pointer;
+      user-select:none;
+      margin:12px 0;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .optionsBtn:active{transform:scale(.99)}
+    .gear{width:18px;height:18px;filter:drop-shadow(0 0 10px rgba(125,211,252,.25))}
+    .console{
+      margin-top:12px;
+      height:230px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.14);
+      background:rgba(0,0,0,.25);
+      padding:14px;
+      overflow:auto;
+      font-family:ui-monospace,Menlo,Consolas,monospace;
+      font-size:14px;
+      box-shadow:inset 0 0 0 1px rgba(125,211,252,.06);
+      line-height:1.55;
+      white-space:pre-wrap;
+    }
+    .line{display:block;margin:2px 0}
+    /* colored tags for conversation */
+    .console .youTag{
+      color:#bfdbfe;
+      font-weight:700;
+    }
+    .console .auraTag{
+      color:#a7f3d0;
+      font-weight:700;
     }
 
-    .app {
-      width: min(980px, 98vw);
-      background: rgba(2,6,23,.45);
-      border: 1px solid rgba(148,163,184,.18);
-      border-radius: 22px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
+    .optionsMenu{
+      position:fixed;
+      left:12px;
+      right:12px;
+      top:120px;
+      margin:0 auto;
+      max-width:940px;
+      background:rgba(2,6,23,.92);
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:16px;
+      padding:8px;
+      display:none;
+      z-index:9999;
+      box-shadow:0 18px 45px rgba(0,0,0,.45);
+      backdrop-filter:blur(10px);
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      align-items:stretch;
+    }
+    .optionsMenu.show{display:grid}
+    .menuItem{
+      padding:8px 6px;
+      border-radius:13px;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      gap:6px;
+      color:#e5e7eb;
+      border:1px solid rgba(148,163,184,.10);
+      background:rgba(15,23,42,.55);
+      user-select:none;
+      min-height:58px;
+    }
+    .menuItem:active{transform:scale(.995)}
+    .menuLeft{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      font-weight:800;
+      font-size:12.5px;
+    }
+    .menuIcon{
+      width:18px;
+      height:18px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .menuRight{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:44px;
+    }
+    .pillOn,.pillOff,.pillMid{
+      font-size:10px;
+      padding:4px 7px;
+      border-radius:999px;
+      font-weight:900;
+      text-transform:lowercase;
+      border:1px solid transparent;
+    }
+    .pillOn{
+      background:rgba(34,197,94,.18);
+      border-color:rgba(34,197,94,.24);
+      color:#bbf7d0;
+    }
+    .pillOff{
+      background:rgba(239,68,68,.12);
+      border-color:rgba(239,68,68,.22);
+      color:#fecaca;
+    }
+    .pillMid{
+      background:rgba(14,165,233,.14);
+      border-color:rgba(14,165,233,.20);
+      color:#bae6fd;
+      opacity:.95;
+    }
+    .chatWrap{
+      margin-top:0;
+      padding:12px;
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.14);
+      background:rgba(2,6,23,.45);
     }
 
-    .top {
-      padding: 20px 18px 10px;
-      border-bottom: 1px solid rgba(148,163,184,.14);
-      text-align: center;
+    /* reaction bar ABOVE metrics + left aligned */
+    .reactionBar{
+      margin-top:4px;
+      margin-bottom:6px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:10px;
+      font-size:18px;
+      opacity:.9;
+    }
+    .reactBtn{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      padding:4px;
+      line-height:1;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .reactBtn:active{transform:scale(.9)}
+
+    .liveCapsule{
+      margin:4px 0 10px;
+      width:100%;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.55);
+      padding:10px 12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      font-family:ui-monospace,Menlo,Consolas,monospace;
+      font-size:12px;
+      color:#dbeafe;
+      box-shadow:inset 0 0 0 1px rgba(125,211,252,.06);
+    }
+    .liveCapsule b{ color:#7dd3fc; font-weight:900 }
+    .faithBubble{
+      margin:4px 0 10px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(251,191,36,.16);
+      border:1px solid rgba(251,191,36,.4);
+      display:none;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:#facc15;
+      cursor:pointer;
+      box-shadow:0 10px 24px rgba(0,0,0,.35);
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .faithBubble.show{
+      display:flex;
+      opacity:1;
+      transform:translateY(0);
+    }
+    .fbIcon{font-size:18px;}
+    .fbText{flex:1;line-height:1.3;}
+    .fbTitle{font-weight:800;}
+    .fbMeta{opacity:.85;}
+    .fbClose{
+      border:none;
+      background:transparent;
+      color:#fed7aa;
+      font-size:16px;
+      cursor:pointer;
+      padding:0 4px;
+      line-height:1;
+    }
+    /* Golden theme from logic */
+    body.theme-golden .ethic{
+      border-color: rgba(251,191,36,.7);
+      background: rgba(251,191,36,.06);
+    }
+    /* Faith bubble pulse animation from logic */
+    .faithBubble.pulse{
+      animation: faithPulse 1.4s infinite;
+    }
+    @keyframes faithPulse{
+      0%   { box-shadow: 0 0 0 0 rgba(251,191,36,.55); }
+      100% { box-shadow: 0 0 0 18px rgba(251,191,36,0); }
+    }
+    .inputRow{display:flex;gap:10px;align-items:flex-end}
+    .input{
+      flex:1;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      padding:12px 14px;
+      outline:none;
+      font-size:14px;
+    }
+    .send{
+      border:none;
+      border-radius:999px;
+      background:linear-gradient(90deg, var(--accent-color, #0ea5e9), rgba(34,211,238,.55));
+      color:#0b1220;
+      font-weight:900;
+      padding:12px 18px;
+      cursor:pointer;
+      min-width:88px;
+      box-shadow:0 12px 30px rgba(14,165,233,.18);
+      -webkit-tap-highlight-color:transparent;
+    }
+    .send:active{transform:scale(.99)}
+    .formula{
+      margin-top:10px;
+      opacity:.8;
+      font-size:12px;
+      text-align:center;
+      font-family:ui-monospace,Menlo,Consolas,monospace;
+      color:#dbeafe;
     }
 
-    .brand {
-      font-weight: 800;
-      letter-spacing: .5px;
-      font-size: 26px;
-      color: #7dd3fc;
-      text-shadow: 0 0 22px rgba(14,165,233,.28);
+    .modalOverlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding:18px 12px;
+      z-index:9999;
+    }
+    .modalOverlay.show{display:flex}
+    .modal{
+      width:min(860px,96vw);
+      border-radius:18px;
+      overflow:hidden;
+      background:rgba(250,250,250,.93);
+      color:#0b1220;
+      border:1px solid rgba(15,23,42,.18);
+      box-shadow:0 30px 80px rgba(0,0,0,.35);
+      backdrop-filter:blur(12px);
+    }
+    .modalHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
+      background:rgba(255,255,255,.75);
+      border-bottom:1px solid rgba(15,23,42,.10);
+      font-weight:800;
+    }
+    .modalHeader small{font-weight:600;opacity:.7}
+    .closeX{
+      border:none;
+      background:transparent;
+      font-size:22px;
+      cursor:pointer;
+      line-height:1;
+      padding:0 4px;
+      opacity:.75;
+    }
+    .modalBody{
+      padding:14px;
+      max-height:70vh;
+      overflow:auto;
+    }
+    .chipsWrap{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px}
+    .chip{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.16);
+      background:rgba(255,255,255,.9);
+      font-weight:800;
+      cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .chip.active{
+      background:#0f172a;
+      color:#fff;
+      border-color:rgba(15,23,42,.2);
+      box-shadow:0 12px 30px rgba(2,6,23,.12);
+    }
+    .btn{
+      border:none;
+      cursor:pointer;
+      padding:10px 14px;
+      border-radius:12px;
+      font-weight:900;
+      -webkit-tap-highlight-color:transparent;
+      font-size:12px;
+    }
+    .btnBlue{background:rgba(59,130,246,.16);border:1px solid rgba(59,130,246,.22)}
+    .btnDark{background:rgba(2,6,23,.92);color:#fff}
+    .btnRed{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.22);color:#7f1d1d}
+    .btnGreen{background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.25);color:#064e2a}
+    .bmCard{
+      border-radius:16px;
+      border:1px solid rgba(15,23,42,.12);
+      background:rgba(255,255,255,.85);
+      padding:12px;
+      margin-top:12px;
+    }
+    .bmTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .bmTop .title{
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .bmSub{font-size:12px;opacity:.7;margin-top:2px}
+    .bmText{
+      width:100%;
+      min-height:240px;
+      border-radius:14px;
+      border:1px solid rgba(15,23,42,.18);
+      padding:12px;
+      outline:none;
+      resize:vertical;
+      background:#fff;
+      font-size:14px;
+      line-height:1.45;
+    }
+    .bmActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      justify-content:flex-start;
+    }
+    .intelEditInput, .intelEditArea{
+      width:100%;
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,.18);
+      padding:10px 12px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+    }
+    .intelEditArea{
+      min-height:90px;
+      resize:vertical;
+      line-height:1.4;
+      margin-top:6px;
     }
 
-    .sub {
-      opacity: .8;
-      margin-top: 2px;
-      font-size: 13px;
+    /* Conversation history – lighter UI + lock icon */
+    #modalHistory .modalBody{
+      background:#f8fafc;
+    }
+    #historyBox{
+      margin-top:4px;
+      border-radius:14px;
+      padding:4px 0;
+      max-height:60vh;
+      overflow:auto;
+    }
+    .historyLine{
+      padding:8px 10px;
+      font-size:12px;
+      margin-bottom:6px;
+      border-radius:12px;
+      background:#f9fafb;
+      border:1px solid rgba(148,163,184,.45);
+      color:#0b1120;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:6px;
+    }
+    .historyText{
+      flex:1;
+      white-space:pre-wrap;
+    }
+    .historyLock{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      font-size:15px;
+      line-height:1;
+      padding:0 2px;
     }
 
-    .ethic {
-      margin: 14px auto 12px;
-      max-width: 720px;
-      border: 1px solid rgba(251,191,36,.35);
-      border-radius: 14px;
-      padding: 12px 14px;
-      color: #fbbf24;
-      background: rgba(2,6,23,.35);
-      box-shadow: inset 0 0 0 1px rgba(251,191,36,.08);
-      font-size: 14px;
-      line-height: 1.45;
+    /* small toast bubble */
+    .toast{
+      position:fixed;
+      bottom:18px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(15,23,42,.96);
+      color:#e5e7eb;
+      padding:6px 14px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.45);
+      font-size:12px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .18s ease, transform .18s ease;
+      z-index:99999;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(-4px);
     }
 
-    .pill {
-      margin: 10px auto 0;
-      max-width: 760px;
-      background: linear-gradient(90deg, rgba(14,165,233,.65), rgba(34,211,238,.45));
-      border: 1px solid rgba(125,211,252,.30);
-      color: #0b1220;
-      font-weight: 800;
-      letter-spacing: .6px;
-      border-radius: 999px;
-      padding: 14px 16px;
-      text-transform: uppercase;
-      box-shadow: 0 12px 40px rgba(14,165,233,.22);
+    .@media-fix{} /* dummy to keep structure clean */
+
+    @media (max-width:760px){
+      .console{height:240px}
+      .optionsMenu{top:112px}
     }
-
-    .main {
-      padding: 16px 16px 18px;
-    }
-
-    .row {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: stretch;
-    }
-
-    .leftCol { flex: 1 1 340px; min-width: 300px; }
-    .rightCol { flex: 1 1 360px; min-width: 320px; }
-
-    .card {
-      background: rgba(2,6,23,.50);
-      border: 1px solid rgba(148,163,184,.16);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      backdrop-filter: blur(10px);
-    }
-
-    .optionsBtn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,.22);
-      background: rgba(15,23,42,.55);
-      color: #e5e7eb;
-      cursor: pointer;
-      user-select: none;
-      margin: 12px 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .optionsBtn:active { transform: scale(.99); }
-
-    .gear {
-      width: 18px;
-      height: 18px;
-      filter: drop-shadow(0 0 10px rgba(125,211,252,.25));
-    }
-
-    .console {
-      margin-top: 12px;
-      height: 230px;
-      border-radius: 16px;
-      border: 1px solid rgba(148,163,184,.14);
-      background: rgba(0,0,0,.25);
-      padding: 14px;
-      overflow: auto;
-      font-family: ui-monospace,Menlo,Consolas,monospace;
-      font-size: 14px;
-      box-shadow: inset 0 0 0 1px rgba(125,211,252,.06);
-      line-height: 1.55;
-      white-space: pre-wrap;
-    }
-
-    .line { display: block; margin: 2px 0; }
-
-    .chatWrap {
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(148,163,184,.14);
-      background: rgba(2,6,23,.45);
-    }
-
-    .liveCapsule {
-      margin: 10px 0;
-      width: 100%;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,.18);
-      background: rgba(2,6,23,.55);
-      padding: 10px 12px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      font-family: ui-monospace,Menlo,Consolas,monospace;
-      font-size: 12px;
-      color: #dbeafe;
-      box-shadow: inset 0 0 0 1px rgba(125,211,252,.06);
-    }
-    .liveCapsule b { color: #7dd3fc; font-weight: 900; }
-
-    .faithBubble {
-      margin: 4px 0 10px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(251,191,36,.16);
-      border: 1px solid rgba(251,191,36,.4);
-      display: none;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: #facc15;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.35);
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    .faithBubble.show { display: flex; opacity: 1; transform: translateY(0); }
-
-    .fbIcon { font-size: 18px; }
-    .fbText { flex: 1; line-height: 1.3; }
-    .fbTitle { font-weight: 800; }
-    .fbMeta { opacity: .85; }
-    .fbClose {
-      border: none;
-      background: transparent;
-      color: #fed7aa;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 0 4px;
-      line-height: 1;
-    }
-
-    .inputRow {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-
-    .input {
-      flex: 1;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,.18);
-      background: rgba(2,6,23,.55);
-      color: #e5e7eb;
-      padding: 12px 14px;
-      outline: none;
-      font-size: 14px;
-    }
-
-    .send {
-      border: none;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(14,165,233,.85), rgba(34,211,238,.55));
-      color: #0b1220;
-      font-weight: 900;
-      padding: 12px 18px;
-      cursor: pointer;
-      min-width: 88px;
-      box-shadow: 0 12px 30px rgba(14,165,233,.18);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .send:active { transform: scale(.99); }
-
-    .formula {
-      margin-top: 10px;
-      opacity: .8;
-      font-size: 12px;
-      text-align: center;
-      font-family: ui-monospace,Menlo,Consolas,monospace;
-      color: #dbeafe;
-    }
-
-    .optionsMenu {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      top: 120px;
-      margin: 0 auto;
-      max-width: 940px;
-      background: rgba(2,6,23,.92);
-      border: 1px solid rgba(148,163,184,.18);
-      border-radius: 16px;
-      padding: 8px;
-      display: none;
-      z-index: 99999;
-      box-shadow: 0 18px 45px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      grid-template-columns: repeat(3,minmax(0,1fr));
-      gap: 8px;
-      align-items: stretch;
-    }
-    .optionsMenu.show { display: grid; }
-
-    .menuItem {
-      padding: 8px 6px;
-      border-radius: 13px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 6px;
-      color: #e5e7eb;
-      border: 1px solid rgba(148,163,184,.10);
-      background: rgba(15,23,42,.55);
-      user-select: none;
-      min-height: 58px;
-    }
-    .menuItem:active { transform: scale(.995); }
-
-    .menuLeft {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-weight: 800;
-      font-size: 12.5px;
-    }
-
-    .menuIcon {
-      width: 18px;
-      height: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .menuRight {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 44px;
-    }
-
-    .pillOn, .pillOff, .pillMid {
-      font-size: 10px;
-      padding: 4px 7px;
-      border-radius: 999px;
-      font-weight: 900;
-      text-transform: lowercase;
-      border: 1px solid transparent;
-    }
-
-    .pillOn {
-      background: rgba(34,197,94,.18);
-      border-color: rgba(34,197,94,.24);
-      color: #bbf7d0;
-    }
-
-    .pillOff {
-      background: rgba(239,68,68,.12);
-      border-color: rgba(239,68,68,.22);
-      color: #fecaca;
-    }
-
-    .pillMid {
-      background: rgba(14,165,233,.14);
-      border-color: rgba(14,165,233,.20);
-      color: #bae6fd;
-      opacity: .95;
-    }
-
-    .modalOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 18px 12px;
-      z-index: 9999;
-    }
-    .modalOverlay.show { display: flex; }
-
-    .modal {
-      width: min(860px,96vw);
-      border-radius: 18px;
-      overflow: hidden;
-      background: rgba(250,250,250,.93);
-      color: #0b1220;
-      border: 1px solid rgba(15,23,42,.18);
-      box-shadow: 0 30px 80px rgba(0,0,0,.35);
-      backdrop-filter: blur(12px);
-    }
-
-    .modalHeader {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 14px;
-      background: rgba(255,255,255,.75);
-      border-bottom: 1px solid rgba(15,23,42,.10);
-      font-weight: 800;
-    }
-
-    .modalHeader small {
-      font-weight: 600;
-      opacity: .7;
-    }
-
-    .closeX {
-      border: none;
-      background: transparent;
-      font-size: 22px;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0 4px;
-      opacity: .75;
-    }
-
-    .modalBody {
-      padding: 14px;
-      max-height: 70vh;
-      overflow: auto;
-    }
-
-    .chipsWrap {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .chip {
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(15,23,42,.16);
-      background: rgba(255,255,255,.9);
-      font-weight: 800;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      font-size: 13px;
-    }
-
-    .chip.active {
-      background: #0f172a;
-      color: #fff;
-      border-color: rgba(15,23,42,.2);
-      box-shadow: 0 12px 30px rgba(2,6,23,.12);
-    }
-
-    .btn {
-      border: none;
-      cursor: pointer;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-weight: 900;
-      -webkit-tap-highlight-color: transparent;
-      font-size: 12px;
-    }
-    .btnBlue { background: rgba(59,130,246,.16); border: 1px solid rgba(59,130,246,.22); }
-    .btnDark { background: rgba(2,6,23,.92); color: #fff; }
-    .btnRed  { background: rgba(239,68,68,.14); border: 1px solid rgba(239,68,68,.22); color:#7f1d1d; }
-    .btnGreen{ background: rgba(34,197,94,.18); border: 1px solid rgba(34,197,94,.25); color:#064e2a; }
-
-    .bmCard {
-      border-radius: 16px;
-      border: 1px solid rgba(15,23,42,.12);
-      background: rgba(255,255,255,.85);
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    .bmTop {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .bmTop .title {
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .bmSub {
-      font-size: 12px;
-      opacity: .7;
-      margin-top: 2px;
-    }
-
-    .bmText {
-      width: 100%;
-      min-height: 200px;
-      border-radius: 14px;
-      border: 1px solid rgba(15,23,42,.18);
-      padding: 12px;
-      outline: none;
-      resize: vertical;
-      background: #fff;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .bmActions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-      justify-content: flex-start;
-    }
-
-    .intelEditInput,
-    .intelEditArea {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid rgba(15,23,42,.18);
-      padding: 10px 12px;
-      font-size: 14px;
-      outline: none;
-      background: #fff;
-    }
-
-    .intelEditArea {
-      min-height: 90px;
-      resize: vertical;
-      line-height: 1.4;
-      margin-top: 6px;
-    }
-
-    @media (max-width:760px) {
-      .console { height: 240px; }
-      .optionsMenu { top: 112px; }
-    }
-
-    @media (max-width:420px) {
-      .brand { font-size: 22px; }
-      .pill { font-size: 14px; }
-      .ethic { font-size: 13px; }
-      .console { height: 260px; }
-      .optionsMenu {
-        gap: 6px;
-        padding: 7px;
-        grid-template-columns: repeat(3,minmax(0,1fr));
+    @media (max-width:420px){
+      .brand{font-size:22px}
+      .pill{font-size:14px}
+      .ethic{font-size:13px}
+      .console{height:260px}
+      .optionsMenu{
+        gap:6px;
+        padding:7px;
+        grid-template-columns:repeat(3,minmax(0,1fr));
       }
-      .menuItem {
-        min-height: 52px;
-        padding: 6px 4px;
+      .menuItem{
+        min-height:52px;
+        padding:6px 4px;
       }
-      .menuLeft { font-size: 11px; }
-      .pillOn,.pillOff,.pillMid {
-        font-size: 9.5px;
-        padding: 4px 6px;
+      .menuLeft{font-size:11px}
+      .pillOn,.pillOff,.pillMid{
+        font-size:9.5px;
+        padding:4px 6px;
+      }
+      .reactionBar{
+        font-size:16px;
+        gap:8px;
       }
     }
   </style>
 </head>
-
 <body>
   <div class="app">
     <div class="top">
@@ -537,12 +571,11 @@
         TM = user inputs only · Internal layers keep continuity and emotional trajectory.
       </div>
       <div class="ethic">
-        Universal ethic: avoid actions that grow negative emotions in you or others. Move gently
-        toward choices that increase shared positive feeling for everyone.
+        Universal ethic: avoid actions that grow negative emotions in you or others.
+        Move gently toward choices that increase shared positive feeling for everyone.
       </div>
       <div class="pill">EMOTIONAL CONTINUITY ENGINE — ACTIVE</div>
     </div>
-
     <div class="main">
       <div class="row">
         <!-- LEFT -->
@@ -551,75 +584,70 @@
             <div class="optionsBtn" id="btnOptions">
               <svg class="gear" viewBox="0 0 24 24" fill="none">
                 <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-                      stroke="#7dd3fc" stroke-width="2" />
+                      stroke="#7dd3fc" stroke-width="2"/>
                 <path d="M19.4 15a8.2 8.2 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a8.5 8.5 0 0 0-1.7-1l-.4-2.6h-4l-.4 2.6a8.5 8.5 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a8.2 8.2 0 0 0 .1 2L2.7 16.5l2 3.5 2.4-1a8.5 8.5 0 0 0 1.7 1l.4 2.6h4l.4-2.6a8.5 8.5 0 0 0 1.7-1l2.4 1 2-3.5L19.4 15Z"
-                      stroke="#7dd3fc" stroke-width="1.6" opacity=".9" />
+                      stroke="#7dd3fc" stroke-width="1.6" opacity=".9"/>
               </svg>
               <span>Options</span>
             </div>
-
-            <!-- Options Grid -->
             <div class="optionsMenu" id="optionsMenu">
               <div class="menuItem" id="miVoice">
                 <div class="menuLeft"><span class="menuIcon">🎤</span><span>Voice</span></div>
                 <div class="menuRight"><span class="pillOff" id="voicePill">off</span></div>
               </div>
-
               <div class="menuItem" id="miIntel">
                 <div class="menuLeft"><span class="menuIcon">🧠</span><span>Intelligence</span></div>
                 <div class="menuRight"><span class="pillMid">open</span></div>
               </div>
-
               <div class="menuItem" id="miLearn">
                 <div class="menuLeft"><span class="menuIcon">📚</span><span>Learning</span></div>
                 <div class="menuRight"><span class="pillOn" id="learnPill">on</span></div>
               </div>
-
               <div class="menuItem" id="miSeed">
                 <div class="menuLeft"><span class="menuIcon">🌱</span><span>Feed</span></div>
                 <div class="menuRight"><span class="pillMid">open</span></div>
               </div>
-
               <div class="menuItem" id="miFaith">
                 <div class="menuLeft"><span class="menuIcon">🕊</span><span>Faith</span></div>
                 <div class="menuRight"><span class="pillOff" id="faithLabel">none</span></div>
               </div>
-
               <div class="menuItem" id="miIdentity">
                 <div class="menuLeft"><span class="menuIcon">🪪</span><span>Identity</span></div>
                 <div class="menuRight"><span class="pillMid">open</span></div>
               </div>
-
               <div class="menuItem" id="miLLM">
                 <div class="menuLeft"><span class="menuIcon">🤖</span><span>LLM</span></div>
                 <div class="menuRight"><span class="pillMid">open</span></div>
               </div>
-
               <div class="menuItem" id="miBMRecall">
                 <div class="menuLeft"><span class="menuIcon">📘</span><span>BM Recall</span></div>
                 <div class="menuRight"><span class="pillMid">open</span></div>
               </div>
-
               <div class="menuItem" id="miHistory">
                 <div class="menuLeft"><span class="menuIcon">📜</span><span>History</span></div>
                 <div class="menuRight"><span class="pillMid">open</span></div>
               </div>
             </div>
-
             <div class="console" id="console"></div>
           </div>
         </div>
-
         <!-- RIGHT -->
         <div class="rightCol">
           <div class="chatWrap">
+            <!-- reaction bar ABOVE metrics, left-aligned -->
+            <div class="reactionBar" id="reactionBar">
+              <button class="reactBtn" id="btnCopyLast" title="Copy last answer">⧉</button>
+              <button class="reactBtn" id="btnLikeLast" title="Save to Intelligence">👍</button>
+              <button class="reactBtn" id="btnDislikeLast" title="Correct answer">👎</button>
+              <button class="reactBtn" id="btnSpeakLast" title="Play voice for last answer">🔊</button>
+              <button class="reactBtn" id="btnShareLast" title="Copy Q + A">🔗</button>
+            </div>
             <div class="liveCapsule">
               <span><b>E0</b>: <span id="cE0">0.000</span></span><span>·</span>
               <span><b>TM</b>: <span id="cTM">0.00</span></span><span>·</span>
               <span><b>BM</b>: <span id="cBM">0.00</span></span><span>·</span>
               <span><b>C</b>: <span id="cCont">0.850</span></span>
             </div>
-
             <div class="faithBubble" id="faithBubble">
               <div class="fbIcon">💭</div>
               <div class="fbText">
@@ -628,16 +656,12 @@
               </div>
               <button class="fbClose" id="faithBubbleClose">×</button>
             </div>
-
             <div class="inputRow">
-              <input class="input" id="userInput"
-                     placeholder="Talk to AURA-X Ω… (TM = your inputs)" />
+              <input class="input" id="userInput" placeholder="Talk to AURA-X Ω… (TM = your inputs)" />
               <button class="send" id="sendBtn">Send</button>
             </div>
-
             <div class="formula">
-              E₀ = tanh( R(TM,BM) + I(TM) + I<sub>intel</sub> + I<sub>LLM</sub> − D +
-              λ<sub>faith</sub> + λ<sub>sys</sub> + λ<sub>trc</sub> )
+              E₀ = tanh( R(TM,BM) + I(TM) + I<sub>intel</sub> + I<sub>LLM</sub> − D + λ<sub>faith</sub> + λ<sub>sys</sub> + λ<sub>trc</sub> )
             </div>
           </div>
         </div>
@@ -645,12 +669,14 @@
     </div>
   </div>
 
+  <!-- toast bubble -->
+  <div class="toast" id="toast"></div>
+
   <!-- Faith selection -->
   <div class="modalOverlay" id="modalFaith">
     <div class="modal">
       <div class="modalHeader">
-        <div>⚙️ AURA-X Ω options<br>
-          <small>Optional faith lens for encouragement lines.</small></div>
+        <div>⚙️ AURA-X Ω options<br><small>Optional faith lens for encouragement lines.</small></div>
         <button class="closeX" data-close="modalFaith">×</button>
       </div>
       <div class="modalBody" style="background:#fdf7e5;">
@@ -663,25 +689,19 @@
     </div>
   </div>
 
-  <!-- Faith Article -->
+  <!-- Faith article -->
   <div class="modalOverlay" id="modalFaithArticle">
     <div class="modal">
       <div class="modalHeader">
-        <div>💭 Faith reflection<br>
-          <small>Story-related suggestion from your selected literature.</small></div>
+        <div>💭 Faith reflection<br><small>Story-related suggestion from your selected literature.</small></div>
         <button class="closeX" data-close="modalFaithArticle">×</button>
       </div>
       <div class="modalBody" style="background:#fefce8;">
-        <div id="faithArticleMeta"
-             style="font-size:12px;opacity:.75;margin-bottom:6px;"></div>
-        <div id="faithArticleTitle"
-             style="font-weight:800;margin-bottom:6px;"></div>
+        <div id="faithArticleMeta" style="font-size:12px;opacity:.75;margin-bottom:6px;"></div>
+        <div id="faithArticleTitle" style="font-weight:800;margin-bottom:6px;"></div>
         <textarea id="faithArticleText"
-          style="width:100%;min-height:160px;border-radius:14px;
-                 border:1px solid rgba(15,23,42,.18);padding:10px;
-                 font-size:13px;line-height:1.4;background:#fff;"></textarea>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;
-                    justify-content:flex-end;">
+          style="width:100%;min-height:160px;border-radius:14px;border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;line-height:1.4;background:#fff;"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
           <button class="btn btnBlue" id="btnCopyFaithArticle">Copy</button>
           <button class="btn btnBlue" id="btnAddFaithToBM">Add under BM prompt</button>
           <button class="btn btnRed" id="btnSkipFaithBM">Skip</button>
@@ -699,15 +719,12 @@
       </div>
       <div class="modalBody">
         <input id="intelSearch"
-          style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);
-                 padding:10px 12px;font-size:14px;outline:none"
+          style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none"
           placeholder="Search intelligence..." />
         <div id="intelEditor" style="margin-top:10px;display:none;">
           <input id="intelEditQ" class="intelEditInput" placeholder="Question" />
-          <textarea id="intelEditA" class="intelEditArea"
-                    placeholder="Answer"></textarea>
-          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;
-                      justify-content:flex-end;">
+          <textarea id="intelEditA" class="intelEditArea" placeholder="Answer"></textarea>
+          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
             <button class="btn btnBlue" id="btnIntelSave">Save</button>
             <button class="btn btnRed" id="btnIntelCancel">Cancel</button>
           </div>
@@ -717,39 +734,61 @@
     </div>
   </div>
 
-  <!-- Seed (Feed) -->
+  <!-- Seed + Logic -->
   <div class="modalOverlay" id="modalSeed">
     <div class="modal">
       <div class="modalHeader">
-        <div>🌱 Feed the seed (protected)<br>
-          <small>Add LaTeX Q → A blocks directly into intelligence memory.</small></div>
+        <div>🌱 Feed the seed<br><small>Add LaTeX Q → A blocks and optional Logic Pack.</small></div>
         <button class="closeX" data-close="modalSeed">×</button>
       </div>
       <div class="modalBody">
         <div style="opacity:.75;font-size:13px;line-height:1.35;margin-bottom:10px">
-          Paste a LaTeX block with \item questions and \textbf{A:} answers. You can optionally
-          start each answer with
-          <span style="font-family:ui-monospace">[polarity=positive; code=E031; intensity=0.8]</span>.
+          Paste a LaTeX block with \item questions and \textbf{A:} answers. You can optionally start each
+          answer with [polarity=positive; code=E031; intensity=0.8].
         </div>
-        <!-- logic area kept visually clean: no default text, no status line -->
         <textarea id="seedBox"
-          style="width:100%;min-height:150px;resize:vertical;border-radius:14px;
-                 border:2px solid rgba(59,130,246,.25);padding:12px;font-size:14px;
-                 outline:none;background:#fff"></textarea>
-        <div style="display:flex;justify-content:space-between;align-items:center;
-                    gap:10px;flex-wrap:wrap;margin-top:10px">
-          <div style="font-size:12px;opacity:.7" id="seedHint">&nbsp;</div>
+          style="width:100%;min-height:150px;resize:vertical;border-radius:14px;border:2px solid rgba(59,130,246,.25);padding:12px;font-size:14px;outline:none;background:#fff"
+          placeholder="Paste LaTeX conversation / logic block here..."></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <div style="font-size:12px;opacity:.7" id="seedHint">Waiting for block…</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btnBlue" id="btnParseSeed">Parse block</button>
             <button class="btn btnBlue" id="btnSaveSeed">Save to seed</button>
             <button class="btn btnRed" id="btnDiscardSeed">Discard</button>
           </div>
         </div>
+        <hr style="margin:14px 0;border:none;border-top:1px dashed rgba(15,23,42,.18);" />
+        <div style="font-weight:800;font-size:13px;margin-bottom:6px;">🧩 Logic Pack (JSON rules – advanced)</div>
+        <div style="font-size:12px;opacity:.75;line-height:1.4;margin-bottom:6px;">
+          Each time you press <b>Save</b>, a new logic pack is stored with its own number.
+          Saved logic packs never auto-delete; they can only be removed manually with double confirmation.
+        </div>
+        <textarea id="logicBox"
+          style="width:100%;min-height:130px;resize:vertical;border-radius:14px;border:2px solid rgba(15,23,42,.18);padding:10px;font-size:13px;outline:none;background:#fff;font-family:ui-monospace,Menlo,Consolas,monospace;"
+          placeholder='{
+  "cooldown": { "hits": 3, "seconds": 10 },
+  "abuseWords": ["stfu","idiot"],
+  "faithSoftener": true,
+  "ui": { "theme": "golden", "accentColor": "#f97316" }
+}'>
+        </textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;">
+          <div style="font-size:12px;opacity:.7" id="logicHint">No logic pack loaded.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btnBlue" id="btnValidateLogic">Validate</button>
+            <button class="btn btnBlue" id="btnSaveLogic">Save</button>
+            <button class="btn btnBlue" id="btnCopyLogic">Copy</button>
+            <button class="btn btnRed" id="btnDeleteLogic">Delete</button>
+          </div>
+        </div>
+        <div style="margin-top:6px;font-size:11px;opacity:.6;">
+          Current serial: <span id="logicSerial">none</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- LLM settings -->
+  <!-- LLM -->
   <div class="modalOverlay" id="modalLLM">
     <div class="modal">
       <div class="modalHeader">
@@ -757,62 +796,41 @@
         <button class="closeX" data-close="modalLLM">×</button>
       </div>
       <div class="modalBody">
-        <div style="border-radius:14px;border:1px solid rgba(34,197,94,.25);
-                    background:rgba(34,197,94,.12);padding:12px;">
+        <div style="border-radius:14px;border:1px solid rgba(34,197,94,.25);background:rgba(34,197,94,.12);padding:12px;">
           <div style="font-weight:900;">Offline LLM (WebLLM)</div>
           <div style="font-size:13px;opacity:.8;margin-top:6px;line-height:1.35">
-            Loads a small local model in your browser (WebGPU required). On many mobile browsers
-            this may not be supported.
+            Loads a small local model in your browser (WebGPU required). On many mobile browsers this may not be supported.
           </div>
           <div style="margin-top:10px;">
             <button class="btn btnGreen" id="btnLoadOffline">Load offline model</button>
           </div>
-          <div style="margin-top:8px;font-size:12px;opacity:.75">
-            Status: <span id="offlineStatus">idle</span></div>
-          <div style="margin-top:8px;height:10px;border-radius:999px;
-                      background:rgba(2,6,23,.12);overflow:hidden;
-                      border:1px solid rgba(2,6,23,.08)">
-            <div id="offlineBar"
-                 style="height:100%;width:0%;background:#22c55e;transition:width .2s ease;"></div>
+          <div style="margin-top:8px;font-size:12px;opacity:.75">Status: <span id="offlineStatus">idle</span></div>
+          <div style="margin-top:8px;height:10px;border-radius:999px;background:rgba(2,6,23,.12);overflow:hidden;border:1px solid rgba(2,6,23,.08)">
+            <div id="offlineBar" style="height:100%;width:0%;background:#22c55e;transition:width .2s ease;"></div>
           </div>
         </div>
-
         <div style="font-weight:900;margin-top:14px;">Online helper LLM (connects & works)</div>
         <div style="font-size:12px;opacity:.8;margin-top:4px;margin-bottom:4px;">
-          Use any compatible API (OpenAI, DeepSeek, xAI, etc.). Nothing is stored on server by
-          AURA-X Ω itself.
+          Use any compatible API (OpenAI, DeepSeek, xAI, etc.). Nothing is stored on server by AURA-X Ω itself.
         </div>
-
         <div style="margin-top:6px;">
-          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">
-            API endpoint</label>
+          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">API endpoint</label>
           <input id="apiEndpoint"
-            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);
-                   padding:10px 12px;font-size:14px;outline:none;
-                   background:rgba(255,255,255,.88)"
+            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
             value="https://api.openai.com/v1/chat/completions" />
         </div>
-
         <div style="margin-top:10px;">
-          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">
-            Model</label>
+          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Model</label>
           <input id="apiModel"
-            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);
-                   padding:10px 12px;font-size:14px;outline:none;
-                   background:rgba(255,255,255,.88)"
+            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
             value="gpt-4o-mini" />
         </div>
-
         <div style="margin-top:10px;">
-          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">
-            API key (session only)</label>
+          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">API key (session only)</label>
           <input id="apiKey"
-            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);
-                   padding:10px 12px;font-size:14px;outline:none;
-                   background:rgba(255,255,255,.88)"
+            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
             placeholder="sk-..." />
         </div>
-
         <div style="margin-top:10px;display:flex;justify-content:flex-end;">
           <button class="btn btnBlue" id="btnSaveLLM">Save</button>
         </div>
@@ -824,56 +842,37 @@
   <div class="modalOverlay" id="modalBM">
     <div class="modal">
       <div class="modalHeader">
-        <div>📘 Recall from BM<br>
-          <small>Only long stories and scenes (photo/video-ready).</small></div>
+        <div>📘 Recall from BM<br><small>Long stories / scenes only.</small></div>
         <button class="closeX" data-close="modalBM">×</button>
       </div>
       <div class="modalBody">
         <div style="font-size:13px;opacity:.75">
-          Select a BM prompt. Locked prompts must be unlocked first. Delete needs double
-          confirmation.
+          Select a BM prompt. Locked prompts must be unlocked first. Delete needs double confirmation.
         </div>
-
-        <!-- NEW: date filter for BM recall -->
+        <!-- search + calendar row -->
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <span style="font-size:12px;opacity:.75;">Filter by date:</span>
-          <input type="date" id="bmDateFilter"
-            style="border-radius:10px;border:1px solid rgba(15,23,42,.18);
-                   padding:6px 8px;font-size:12px;">
-          <button class="btn btnBlue" id="btnClearBMFilter">Clear</button>
+          <input id="bmSearch"
+            style="flex:1;min-width:160px;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;margin:0;outline:none;background:#fff;"
+            placeholder="Search BM by text..." />
+          <input id="bmDate" type="date"
+            style="width:150px;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;outline:none;background:#fff;" />
         </div>
-
-        <div id="bmSelectList" style="margin-top:8px;"></div>
-
+        <div id="bmSelectList"></div>
         <div class="bmCard" id="bmViewer" style="display:none;">
           <div class="bmTop">
             <div>
-              <div class="title"><span id="bmLockIcon">🔓</span>
-                <span id="bmTitle">Prompt</span></div>
+              <div class="title"><span id="bmLockIcon">🔓</span> <span id="bmTitle">Prompt</span></div>
               <div class="bmSub" id="bmMeta"></div>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
-              <button class="btn btnBlue" id="btnLiveBM">Live 12h: off</button>
+              <button class="btn btnBlue" id="btnLiveBM">Live 24h: off</button>
               <button class="btn btnBlue" id="btnUnlockBM" style="display:none;">Unlock</button>
             </div>
           </div>
-
           <textarea class="bmText" id="bmTextArea" readonly></textarea>
-
-          <!-- Evidence notes + simple attachment metadata -->
-          <textarea class="bmText" id="bmEvidenceArea"
-            style="margin-top:8px;min-height:100px;"
-            placeholder="Evidence notes: links or descriptions of photos, videos, voice notes for this memory. (Stored only on this device.)"></textarea>
-          <div id="bmEvidenceInfo"
-               style="font-size:12px;opacity:.7;margin-top:6px;"></div>
-          <input type="file" id="bmFileInput" multiple
-                 accept="image/*,video/*,audio/*" style="display:none;">
-
           <div class="bmActions">
             <button class="btn btnBlue" id="btnCopyPrompt">Copy prompt</button>
             <button class="btn btnBlue" id="btnAutoGen">Auto generate</button>
-            <button class="btn btnBlue" id="btnAttachFiles">Add files</button>
-            <button class="btn btnBlue" id="btnSaveEvidence">Save evidence</button>
             <button class="btn btnRed" id="btnDeletePrompt">Delete</button>
           </div>
         </div>
@@ -885,8 +884,7 @@
   <div class="modalOverlay" id="modalHistory">
     <div class="modal">
       <div class="modalHeader">
-        <div>📜 Conversation history<br>
-          <small>Recent TM log (user + system messages).</small></div>
+        <div>📜 Conversation history<br><small>Recent TM log.</small></div>
         <button class="closeX" data-close="modalHistory">×</button>
       </div>
       <div class="modalBody">
@@ -895,9 +893,7 @@
           <button class="btn btnRed" id="btnDeleteAllHist">Delete all history</button>
           <button class="btn btnBlue" id="btnCopyHistory">Copy</button>
         </div>
-        <div id="historyBox"
-          style="margin-top:4px;border-radius:14px;padding:4px 0;
-                 max-height:60vh;overflow:auto;"></div>
+        <div id="historyBox"></div>
       </div>
     </div>
   </div>
@@ -906,1030 +902,1508 @@
   <div class="modalOverlay" id="modalIdentity">
     <div class="modal">
       <div class="modalHeader">
-        <div>🪪 User identity<br>
-          <small>Deep profiling for continuity & emotional cloning.</small></div>
+        <div>🪪 User identity<br><small>Deep profiling for continuity.</small></div>
         <button class="closeX" data-close="modalIdentity">×</button>
       </div>
       <div class="modalBody">
-        <div style="opacity:.8;font-size:13px;line-height:1.35;margin-bottom:8px;">
-          Stored only on this device. Saved data auto-locks conceptually; delete requires double
-          confirmation. This form helps AURA-X Ω mirror your voice, emotional style,
-          relationships, and legacy.
+        <div style="opacity:.8;font-size:13px;line-height:1.35">
+          Stored only on this device. Saved data auto-locks. Delete requires double confirmation.
         </div>
-
-        <div style="display:grid;gap:10px;">
-          <div style="border-radius:14px;border:1px solid rgba(15,23,42,.12);padding:10px;">
-            <div style="font-weight:800;">1. Core identity</div>
-            <div style="font-size:12px;opacity:.75;margin-top:4px;">
-              Name, age range, where you live, languages, main roles (e.g., engineer, parent,
-              student…).
-            </div>
-            <textarea id="idCore"
-              style="margin-top:6px;width:100%;min-height:80px;border-radius:12px;
-                     border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;
-                     line-height:1.4;"></textarea>
+        <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+          <button class="btn btnBlue" id="btnEditIdentity">Edit</button>
+          <button class="btn btnBlue" id="btnSaveUserIdentity">Save</button>
+          <button class="btn btnRed" id="btnDeleteUserIdentity">Delete</button>
+        </div>
+        <div style="margin-top:14px;font-weight:800;font-size:13px;">Part 1 – Basic</div>
+        <div style="margin-top:8px;">
+          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Full legal name</label>
+          <input id="uName"
+            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
+            placeholder="e.g., Alim ul Haq" />
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Preferred name</label>
+            <input id="uNick"
+              style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
+              placeholder="Nickname" />
           </div>
-
-          <div style="border-radius:14px;border:1px solid rgba(15,23,42,.12);padding:10px;">
-            <div style="font-weight:800;">2. Life anchors</div>
-            <div style="font-size:12px;opacity:.75;margin-top:4px;">
-              Daily responsibilities, important projects, routines that shape your days.
-            </div>
-            <textarea id="idAnchors"
-              style="margin-top:6px;width:100%;min-height:80px;border-radius:12px;
-                     border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;
-                     line-height:1.4;"></textarea>
-          </div>
-
-          <div style="border-radius:14px;border:1px solid rgba(15,23,42,.12);padding:10px;">
-            <div style="font-weight:800;">3. Relationships & circles</div>
-            <div style="font-size:12px;opacity:.75;margin-top:4px;">
-              Key people (family, friends, mentors), how close you feel, any boundaries.
-            </div>
-            <textarea id="idRelationships"
-              style="margin-top:6px;width:100%;min-height:80px;border-radius:12px;
-                     border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;
-                     line-height:1.4;"></textarea>
-          </div>
-
-          <div style="border-radius:14px;border:1px solid rgba(15,23,42,.12);padding:10px;">
-            <div style="font-weight:800;">4. Emotional style</div>
-            <div style="font-size:12px;opacity:.75;margin-top:4px;">
-              How you react under stress, what calms you, typical thinking patterns.
-            </div>
-            <textarea id="idStyle"
-              style="margin-top:6px;width:100%;min-height:80px;border-radius:12px;
-                     border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;
-                     line-height:1.4;"></textarea>
-          </div>
-
-          <div style="border-radius:14px;border:1px solid rgba(15,23,42,.12);padding:10px;">
-            <div style="font-weight:800;">5. Legacy / direction</div>
-            <div style="font-size:12px;opacity:.75;margin-top:4px;">
-              What you want to build, protect, or leave behind in this life.
-            </div>
-            <textarea id="idLegacy"
-              style="margin-top:6px;width:100%;min-height:80px;border-radius:12px;
-                     border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;
-                     line-height:1.4;"></textarea>
-          </div>
-
-          <div style="margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;
-                      justify-content:flex-end;">
-            <button class="btn btnBlue" id="btnSaveIdentity">Save identity</button>
-            <button class="btn btnRed" id="btnClearIdentity">Clear</button>
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Place of origin</label>
+            <input id="uOrigin"
+              style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
+              placeholder="Village / town" />
           </div>
         </div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Current city / country</label>
+            <input id="uPlace"
+              style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
+              placeholder="Timergara, Pakistan" />
+          </div>
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Profession</label>
+            <input id="uProfession"
+              style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none;background:rgba(255,255,255,.88)"
+              placeholder="Entrepreneur, researcher…" />
+          </div>
+        </div>
+        <div style="margin-top:14px;font-weight:800;font-size:13px;">Part 2 – Emotional style</div>
+        <textarea id="uEmotionalStyle"
+          style="width:100%;margin-top:6px;border-radius:14px;border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;line-height:1.4;min-height:90px;"
+          placeholder="How you react under stress, joy, fear, success…"></textarea>
+        <div style="margin-top:14px;font-weight:800;font-size:13px;">Part 3 – Relationships & legacy</div>
+        <textarea id="uKeyPeople"
+          style="width:100%;margin-top:6px;border-radius:14px;border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;line-height:1.4;min-height:80px;"
+          placeholder="Key people and roles in your life…"></textarea>
+        <textarea id="uLegacyRules"
+          style="width:100%;margin-top:6px;border-radius:14px;border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;line-height:1.4;min-height:80px;"
+          placeholder="If one day this system speaks for you, which boundaries and rules must it follow?"></textarea>
       </div>
     </div>
   </div>
 
   <script>
-    (() => {
-      const $  = (sel) => document.querySelector(sel);
-      const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+    window.addEventListener("DOMContentLoaded", () => {
+      const KEY_CFG   = "aurax_cfg_v12";
+      const KEY_INT   = "aurax_intel_v11";
+      const KEY_BM    = "aurax_bm_v11";
+      const KEY_HIST  = "aurax_hist_v11";
+      const KEY_USER  = "aurax_user_v11";
+      const KEY_LOGIC = "aurax_logic_v12";
+      const OFFLINE_MODEL_ID = "Llama-3-8B-Instruct-q4f32_1-MLC";
 
-      const STORAGE_KEY = "AURAX_OMEGA_V10";
-
-      const defaultState = {
-        console: [],
-        faith: { selected: ["none"] },
-        intel: [],
-        history: [],
-        bm: [],
-        identity: {
-          core: "",
-          anchors: "",
-          relationships: "",
-          style: "",
-          legacy: ""
-        },
-        llm: {
-          endpoint: "https://api.openai.com/v1/chat/completions",
-          model: "gpt-4o-mini"
-        },
-        settings: {
-          voiceEnabled: false,
-          learningEnabled: true
-        },
-        metrics: {
-          E0: 0,
-          TM: 0,
-          BM: 0,
-          continuity: 0.85
-        }
+      const els = {
+        console: document.getElementById("console"),
+        btnOptions: document.getElementById("btnOptions"),
+        optionsMenu: document.getElementById("optionsMenu"),
+        miVoice: document.getElementById("miVoice"),
+        miIntel: document.getElementById("miIntel"),
+        miLearn: document.getElementById("miLearn"),
+        miSeed: document.getElementById("miSeed"),
+        miFaith: document.getElementById("miFaith"),
+        miIdentity: document.getElementById("miIdentity"),
+        miLLM: document.getElementById("miLLM"),
+        miBMRecall: document.getElementById("miBMRecall"),
+        miHistory: document.getElementById("miHistory"),
+        voicePill: document.getElementById("voicePill"),
+        learnPill: document.getElementById("learnPill"),
+        faithLabel: document.getElementById("faithLabel"),
+        cE0: document.getElementById("cE0"),
+        cTM: document.getElementById("cTM"),
+        cBM: document.getElementById("cBM"),
+        cCont: document.getElementById("cCont"),
+        userInput: document.getElementById("userInput"),
+        sendBtn: document.getElementById("sendBtn"),
+        faithBubble: document.getElementById("faithBubble"),
+        faithBubbleTitle: document.getElementById("faithBubbleTitle"),
+        faithBubbleMeta: document.getElementById("faithBubbleMeta"),
+        faithBubbleClose: document.getElementById("faithBubbleClose"),
+        modalFaith: document.getElementById("modalFaith"),
+        faithChips: document.getElementById("faithChips"),
+        modalFaithArticle: document.getElementById("modalFaithArticle"),
+        faithArticleMeta: document.getElementById("faithArticleMeta"),
+        faithArticleTitle: document.getElementById("faithArticleTitle"),
+        faithArticleText: document.getElementById("faithArticleText"),
+        btnCopyFaithArticle: document.getElementById("btnCopyFaithArticle"),
+        btnAddFaithToBM: document.getElementById("btnAddFaithToBM"),
+        btnSkipFaithBM: document.getElementById("btnSkipFaithBM"),
+        modalIntel: document.getElementById("modalIntel"),
+        intelSearch: document.getElementById("intelSearch"),
+        intelList: document.getElementById("intelList"),
+        intelEditor: document.getElementById("intelEditor"),
+        intelEditQ: document.getElementById("intelEditQ"),
+        intelEditA: document.getElementById("intelEditA"),
+        btnIntelSave: document.getElementById("btnIntelSave"),
+        btnIntelCancel: document.getElementById("btnIntelCancel"),
+        modalSeed: document.getElementById("modalSeed"),
+        seedBox: document.getElementById("seedBox"),
+        seedHint: document.getElementById("seedHint"),
+        btnParseSeed: document.getElementById("btnParseSeed"),
+        btnSaveSeed: document.getElementById("btnSaveSeed"),
+        btnDiscardSeed: document.getElementById("btnDiscardSeed"),
+        logicBox: document.getElementById("logicBox"),
+        logicHint: document.getElementById("logicHint"),
+        logicSerial: document.getElementById("logicSerial"),
+        btnValidateLogic: document.getElementById("btnValidateLogic"),
+        btnSaveLogic: document.getElementById("btnSaveLogic"),
+        btnCopyLogic: document.getElementById("btnCopyLogic"),
+        btnDeleteLogic: document.getElementById("btnDeleteLogic"),
+        modalLLM: document.getElementById("modalLLM"),
+        btnLoadOffline: document.getElementById("btnLoadOffline"),
+        offlineStatus: document.getElementById("offlineStatus"),
+        offlineBar: document.getElementById("offlineBar"),
+        apiEndpoint: document.getElementById("apiEndpoint"),
+        apiModel: document.getElementById("apiModel"),
+        apiKey: document.getElementById("apiKey"),
+        btnSaveLLM: document.getElementById("btnSaveLLM"),
+        modalBM: document.getElementById("modalBM"),
+        bmSearch: document.getElementById("bmSearch"),
+        bmDate: document.getElementById("bmDate"),
+        bmSelectList: document.getElementById("bmSelectList"),
+        bmViewer: document.getElementById("bmViewer"),
+        bmLockIcon: document.getElementById("bmLockIcon"),
+        bmTitle: document.getElementById("bmTitle"),
+        bmMeta: document.getElementById("bmMeta"),
+        bmTextArea: document.getElementById("bmTextArea"),
+        btnLiveBM: document.getElementById("btnLiveBM"),
+        btnUnlockBM: document.getElementById("btnUnlockBM"),
+        btnCopyPrompt: document.getElementById("btnCopyPrompt"),
+        btnAutoGen: document.getElementById("btnAutoGen"),
+        btnDeletePrompt: document.getElementById("btnDeletePrompt"),
+        modalHistory: document.getElementById("modalHistory"),
+        btnDeleteRecent: document.getElementById("btnDeleteRecent"),
+        btnDeleteAllHist: document.getElementById("btnDeleteAllHist"),
+        btnCopyHistory: document.getElementById("btnCopyHistory"),
+        historyBox: document.getElementById("historyBox"),
+        modalIdentity: document.getElementById("modalIdentity"),
+        btnEditIdentity: document.getElementById("btnEditIdentity"),
+        btnSaveUserIdentity: document.getElementById("btnSaveUserIdentity"),
+        btnDeleteUserIdentity: document.getElementById("btnDeleteUserIdentity"),
+        uName: document.getElementById("uName"),
+        uNick: document.getElementById("uNick"),
+        uOrigin: document.getElementById("uOrigin"),
+        uPlace: document.getElementById("uPlace"),
+        uProfession: document.getElementById("uProfession"),
+        uEmotionalStyle: document.getElementById("uEmotionalStyle"),
+        uKeyPeople: document.getElementById("uKeyPeople"),
+        uLegacyRules: document.getElementById("uLegacyRules"),
+        /* reaction buttons */
+        btnCopyLast: document.getElementById("btnCopyLast"),
+        btnLikeLast: document.getElementById("btnLikeLast"),
+        btnDislikeLast: document.getElementById("btnDislikeLast"),
+        btnSpeakLast: document.getElementById("btnSpeakLast"),
+        btnShareLast: document.getElementById("btnShareLast"),
+        toast: document.getElementById("toast")
       };
 
-      function cloneDefault() {
-        return JSON.parse(JSON.stringify(defaultState));
-      }
-
-      function loadState() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) return cloneDefault();
-          const parsed = JSON.parse(raw);
-          return Object.assign(cloneDefault(), parsed || {});
-        } catch (e) {
-          console.warn("AURA-X Ω: failed to load state", e);
-          return cloneDefault();
-        }
-      }
-
-      function saveState() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch (e) {
-          console.warn("AURA-X Ω: failed to save state", e);
-        }
-      }
-
-      function escapeHtml(str) {
-        return (str || "").replace(/[&<>"']/g, c => (
-          { "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]
-        ));
-      }
-
-      let state = loadState();
-      if (!state.metrics) state.metrics = cloneDefault().metrics;
-      if (!state.faith) state.faith = { selected: ["none"] };
-
-      const consoleEl   = $("#console");
-      const optionsMenu = $("#optionsMenu");
-      const btnOptions  = $("#btnOptions");
-
-      const cE0El   = $("#cE0");
-      const cTMEl   = $("#cTM");
-      const cBMEl   = $("#cBM");
-      const cContEl = $("#cCont");
-
-      const faithBubble      = $("#faithBubble");
-      const faithBubbleMeta  = $("#faithBubbleMeta");
-      const faithBubbleTitle = $("#faithBubbleTitle");
-      const faithBubbleClose = $("#faithBubbleClose");
-
-      const userInput = $("#userInput");
-      const sendBtn   = $("#sendBtn");
-
       const FAITH_OPTIONS = [
-        { id: "none",         label: "None" },
-        { id: "islam",        label: "Islam" },
-        { id: "christianity", label: "Christianity" },
-        { id: "hinduism",     label: "Hinduism" },
-        { id: "buddhism",     label: "Buddhism" },
-        { id: "sikhism",      label: "Sikhism" },
-        { id: "judaism",      label: "Judaism" },
-        { id: "atheism",      label: "Atheism / Humanism" },
-        { id: "other",        label: "Other / Mixed" },
-        { id: "indigenous",   label: "Indigenous / Traditional" },
-        { id: "eastern",      label: "Eastern / Chinese" }
+        { id: "none",        label: "None" },
+        { id: "islam",       label: "Islam" },
+        { id: "christianity",label: "Christianity" },
+        { id: "hinduism",    label: "Hinduism" },
+        { id: "buddhism",    label: "Buddhism" },
+        { id: "sikhism",     label: "Sikhism" },
+        { id: "judaism",     label: "Judaism" },
+        { id: "atheism",     label: "Atheism / Humanism" },
+        { id: "mixed",       label: "Other / Mixed" },
+        { id: "indigenous",  label: "Indigenous / Traditional" },
+        { id: "eastern",     label: "Eastern / Chinese" }
       ];
 
-      // Session-only API key (not saved to localStorage)
-      let sessionApiKey = "";
+      const FAITH_LIBRARY = {
+        islam: [{
+          id: "islam_generic",
+          title: "Meaning of hardship and patience",
+          short: "Trust, sabr and good opinion of Allah during hard stories.",
+          content:
+            "In Islamic reflection, hardship is often seen as a temporary test that polishes the heart. " +
+            "Believers are invited toward sabr (patience), shukr (gratitude where possible), and husn-uz-zann " +
+            "(a good opinion of Allah). You can ask: what quality is being trained in me here, and which door " +
+            "of mercy may open later from this chapter of my life?"
+        }]
+      };
 
-      // --- Console logging ---------------------------------------------------
-      function appendConsoleLine(entry) {
+      let state = {
+        voiceOn: false,
+        learningOn: true,
+        faithSelection: [],
+        intelligence: [],
+        bmPrompts: [],
+        history: [],
+        userIdentity: null,
+        apiConfig: { endpoint: "", model: "", key: "" },
+        offlineEngine: null,
+        offlineLoading: false,
+        offlineReady: false,
+        lastAnswerSource: null,
+        lastUserQ: null,
+        lastAuraA: null,
+        metrics: { TM:0, BM:0, C:0.85, E0:0 },
+        parsedSeed: [],
+        editingIntelId: null,
+        lastStoryInput: null,
+        lastStoryBMId: null,
+        faithBubbleTimer: null,
+        currentFaithArticle: null,
+        logicPacks: [],
+        logicActiveIndex: null,
+        abuseCount: 0,
+        cooldownUntil: 0,
+        mode: "adult",
+        logicFaithSoftener: true
+      };
+
+      function safeLoadJSON(key, fallback){
+        try{
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : fallback;
+        }catch{ return fallback; }
+      }
+      function logLine(text){
         const div = document.createElement("div");
         div.className = "line";
-        div.textContent = `[${entry.time}] ${entry.tag.toUpperCase()}: ${entry.text}`;
-        consoleEl.appendChild(div);
-        consoleEl.scrollTop = consoleEl.scrollHeight;
+        div.textContent = text;
+        els.console.appendChild(div);
+        els.console.scrollTop = els.console.scrollHeight;
+      }
+      /* conversation lines with colored AURA / You */
+      function appendChat(role, text){
+        const line = document.createElement("div");
+        line.className = "line";
+        const tag = document.createElement("span");
+        const msg = document.createElement("span");
+        if(role === "user"){
+          tag.className = "youTag";
+          tag.textContent = "You: ";
+        }else{
+          tag.className = "auraTag";
+          tag.textContent = "AURA: ";
+        }
+        msg.textContent = text;
+        line.appendChild(tag);
+        line.appendChild(msg);
+        els.console.appendChild(line);
+        els.console.scrollTop = els.console.scrollHeight;
       }
 
-      function logConsole(text, tag = "sys") {
-        const entry = {
-          time: new Date().toLocaleTimeString(),
-          tag,
-          text
-        };
-        state.console.push(entry);
-        if (state.console.length > 400) state.console.shift();
-        appendConsoleLine(entry);
-        saveState();
+      function showToast(msg){
+        if(!els.toast) return;
+        els.toast.textContent = msg;
+        els.toast.classList.add("show");
+        setTimeout(()=>els.toast.classList.remove("show"), 1400);
       }
 
-      // --- Metrics -----------------------------------------------------------
-      function updateMetricsDisplay() {
-        const m = state.metrics || {};
-        cE0El.textContent   = (m.E0   ?? 0).toFixed(3);
-        cTMEl.textContent   = (m.TM   ?? 0).toFixed(2);
-        cBMEl.textContent   = (m.BM   ?? 0).toFixed(2);
-        cContEl.textContent = (m.continuity ?? 0.85).toFixed(3);
+      function scoreTM(t){
+        const len = Math.min((t||"").length,600);
+        return Number(Math.tanh(len/200).toFixed(2));
       }
-
-      function updateMetricsFromMessage(text) {
-        const len = (text || "").length;
-        const TM  = Math.max(0.05, Math.min(1, len / 280));
-        const bmCount = Array.isArray(state.bm) ? state.bm.length : 0;
-        const BM  = Math.min(1, bmCount / 20 + (state.liveBMId ? 0.15 : 0));
-
-        const historyLen = Array.isArray(state.history) ? state.history.length : 0;
-        const continuity = Math.min(1, 0.6 + 0.4 * Math.min(1, historyLen / 80));
-
-        const faithSel = state.faith && state.faith.selected || [];
-        const lambdaFaith = (faithSel.length && !faithSel.includes("none")) ? 0.08 : 0;
+      function recomputeBMMetric(){
+        const count = state.bmPrompts.length || 0;
+        state.metrics.BM = Number(Math.tanh(count/10).toFixed(2));
+      }
+      function recomputeE0(intelBoost, llmBoost){
+        const TM = state.metrics.TM;
+        const BM = state.metrics.BM;
+        const R = TM * BM;
+        const I_tm = 0.3 * TM;
+        const D = 0.1;
+        const lambdaFaith = state.faithSelection.length ? 0.15 : 0;
         const lambdaSys   = 0.05;
-        const lambdaTrc   = 0.07;
-        const decay       = 0.10;
-
-        const resonance   = (0.6 * TM + 0.4 * BM) * continuity;
-        const E0          = Math.tanh(resonance - decay + lambdaFaith + lambdaSys + lambdaTrc);
-
-        state.metrics = { E0, TM, BM, continuity };
-        saveState();
-        updateMetricsDisplay();
+        const lambdaTrc   = 0.05;
+        const raw = R + I_tm + intelBoost + llmBoost - D + lambdaFaith + lambdaSys + lambdaTrc;
+        state.metrics.E0 = Number(Math.tanh(raw).toFixed(3));
+      }
+      function updateCapsule(){
+        els.cTM.textContent = state.metrics.TM.toFixed(2);
+        els.cBM.textContent = state.metrics.BM.toFixed(2);
+        els.cCont.textContent = state.metrics.C.toFixed(3);
+        els.cE0.textContent = state.metrics.E0.toFixed(3);
       }
 
-      // --- Options menu ------------------------------------------------------
-      function closeOptionsMenu() {
-        optionsMenu.classList.remove("show");
+      function saveCfg(){
+        const cfg = {
+          voiceOn: state.voiceOn,
+          learningOn: state.learningOn,
+          faithSelection: state.faithSelection,
+          apiConfig: state.apiConfig,
+          offlineReady: state.offlineReady
+        };
+        localStorage.setItem(KEY_CFG, JSON.stringify(cfg));
+      }
+      function saveIntelligence(){ localStorage.setItem(KEY_INT, JSON.stringify(state.intelligence)); }
+      function saveBM(){ localStorage.setItem(KEY_BM, JSON.stringify(state.bmPrompts)); }
+      function saveHistory(){ localStorage.setItem(KEY_HIST, JSON.stringify(state.history)); }
+      function saveUserIdentity(){ localStorage.setItem(KEY_USER, JSON.stringify(state.userIdentity)); }
+      function persistLogicState(){
+        const data = { list: state.logicPacks || [], activeIndex: state.logicActiveIndex };
+        localStorage.setItem(KEY_LOGIC, JSON.stringify(data));
       }
 
-      btnOptions.addEventListener("click", () => {
-        optionsMenu.classList.toggle("show");
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!optionsMenu.contains(e.target) && !btnOptions.contains(e.target)) {
-          closeOptionsMenu();
-        }
-      });
-
-      // --- Helpers for modals ------------------------------------------------
-      function openModal(id) {
-        const el = document.getElementById(id);
-        if (el) el.classList.add("show");
+      function addHistory(role,text){
+        const item = { role, text, ts: Date.now(), locked: false };
+        state.history.push(item);
+        const cutoff = Date.now() - 48*60*60*1000;
+        state.history = state.history.filter(h => h.locked || h.ts >= cutoff);
+        saveHistory();
       }
-
-      function closeModal(id) {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove("show");
+      function toggleHistoryLock(idx){
+        const h = state.history[idx];
+        if(!h) return;
+        h.locked = !h.locked;
+        saveHistory();
+        renderHistory();
       }
-
-      $$(".closeX").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.close;
-          if (id) closeModal(id);
+      function renderHistory(){
+        els.historyBox.innerHTML = "";
+        state.history.forEach((h,idx)=>{
+          const row = document.createElement("div");
+          row.className = "historyLine";
+          const dt = new Date(h.ts).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+          const label = h.role==="user" ? "you" : (h.role==="aura" ? "aura" : h.role);
+          const txt = document.createElement("div");
+          txt.className = "historyText";
+          txt.textContent = label + "\n" + h.text;
+          const lockBtn = document.createElement("button");
+          lockBtn.type = "button";
+          lockBtn.className = "historyLock";
+          lockBtn.textContent = h.locked ? "🔒" : "🔓";
+          lockBtn.title = h.locked ? "Locked (won't auto-delete)" : "Tap to lock";
+          lockBtn.addEventListener("click", (ev)=>{
+            ev.stopPropagation();
+            toggleHistoryLock(idx);
+          });
+          const timeSpan = document.createElement("div");
+          timeSpan.style.fontSize = "10px";
+          timeSpan.style.opacity = ".7";
+          timeSpan.textContent = dt;
+          txt.appendChild(document.createElement("br"));
+          txt.appendChild(timeSpan);
+          row.appendChild(txt);
+          row.appendChild(lockBtn);
+          els.historyBox.appendChild(row);
         });
-      });
-
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          $$(".modalOverlay").forEach(m => m.classList.remove("show"));
-          closeOptionsMenu();
-        }
-      });
-
-      // --- Faith chips & bubble ---------------------------------------------
-      const faithChipsEl = $("#faithChips");
-      const faithLabel   = $("#faithLabel");
-
-      function updateFaithLabel() {
-        const sel = state.faith.selected || [];
-        if (!sel.length || sel.includes("none")) {
-          faithLabel.textContent = "none";
-          faithLabel.className = "pillOff";
-          faithBubble.classList.remove("show");
-        } else {
-          faithLabel.textContent = sel.length === 1 ? sel[0] : "multi";
-          faithLabel.className = "pillOn";
-        }
       }
 
-      function renderFaithChips() {
-        const sel = state.faith.selected || ["none"];
-        faithChipsEl.innerHTML = "";
-        FAITH_OPTIONS.forEach(opt => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "chip" + (sel.includes(opt.id) ? " active" : "");
-          btn.textContent = opt.label;
-          btn.addEventListener("click", () => toggleFaith(opt.id));
-          faithChipsEl.appendChild(btn);
+      function renderFaithChips(){
+        els.faithChips.innerHTML = "";
+        FAITH_OPTIONS.forEach(opt=>{
+          const chip = document.createElement("button");
+          const active = opt.id==="none"
+            ? state.faithSelection.length===0
+            : state.faithSelection.includes(opt.id);
+          chip.className = "chip"+(active?" active":"");
+          chip.textContent = opt.label;
+          chip.addEventListener("click",()=>toggleFaith(opt.id));
+          els.faithChips.appendChild(chip);
         });
         updateFaithLabel();
       }
-
-      function toggleFaith(id) {
-        let sel = state.faith.selected || [];
-        if (id === "none") {
-          sel = ["none"];
-        } else {
-          sel = sel.filter(x => x !== "none");
-          if (sel.includes(id)) {
-            sel = sel.filter(x => x !== id);
-          } else {
-            sel.push(id);
-          }
+      function updateFaithLabel(){
+        if(!state.faithSelection.length){
+          els.faithLabel.textContent = "none";
+          els.faithLabel.className = "pillOff";
+        }else if(state.faithSelection.length===1){
+          const opt = FAITH_OPTIONS.find(o=>o.id===state.faithSelection[0]);
+          els.faithLabel.textContent = opt ? opt.label : "1";
+          els.faithLabel.className = "pillOn";
+        }else{
+          els.faithLabel.textContent = "multi";
+          els.faithLabel.className = "pillMid";
         }
-        if (!sel.length) sel = ["none"];
-        state.faith.selected = sel;
-        saveState();
+      }
+      function toggleFaith(id){
+        if(id==="none") state.faithSelection = [];
+        else{
+          const idx = state.faithSelection.indexOf(id);
+          if(idx>=0) state.faithSelection.splice(idx,1);
+          else state.faithSelection.push(id);
+        }
+        saveCfg();
         renderFaithChips();
       }
 
-      function maybeShowFaithBubble(tmText) {
-        const sel = state.faith.selected || [];
-        if (!sel.length || sel.includes("none")) return;
-        // Simple throttling: only sometimes
-        if (Math.random() < 0.4) {
-          state.lastFaithTM = tmText;
-          faithBubbleTitle.textContent = "Faith lens active";
-          faithBubbleMeta.textContent  = "Tap to see a gentle reflection for this moment.";
-          faithBubble.classList.add("show");
-        }
-      }
-
-      faithBubble.addEventListener("click", () => {
-        if (!state.faith.selected || state.faith.selected.includes("none")) return;
-        const selNames = state.faith.selected.join(", ");
-        $("#faithArticleMeta").textContent =
-          "Selected lenses: " + selNames + " · locally generated note";
-        $("#faithArticleTitle").textContent =
-          "Soft reminder about balance, patience, and shared goodness";
-        const tm = state.lastFaithTM || "";
-        $("#faithArticleText").value =
-          "Imagine a short teaching from your selected traditions about responding with wisdom " +
-          "instead of pure reaction.\n\nRecent TM:\n" + tm;
-        openModal("modalFaithArticle");
+      function showModal(id){ const el=document.getElementById(id); if(el) el.classList.add("show"); }
+      function hideModal(id){ const el=document.getElementById(id); if(el) el.classList.remove("show"); }
+      document.querySelectorAll(".closeX").forEach(btn=>{
+        const target=btn.getAttribute("data-close");
+        if(target) btn.addEventListener("click",()=>hideModal(target));
       });
 
-      faithBubbleClose.addEventListener("click", (e) => {
-        e.stopPropagation();
-        faithBubble.classList.remove("show");
-      });
-
-      $("#btnCopyFaithArticle").addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText($("#faithArticleText").value || "");
-          alert("Faith reflection copied.");
-        } catch {
-          alert("Copy failed (clipboard not available).");
-        }
-      });
-
-      $("#btnAddFaithToBM").addEventListener("click", () => {
-        const text = $("#faithArticleText").value || "";
-        if (!text.trim()) return;
-        const nowIso = new Date().toISOString();
-        if (!Array.isArray(state.bm)) state.bm = [];
-        state.bm.push({
-          id: "faith-" + nowIso,
-          title: "Faith reflection",
-          text,
-          locked: false,
-          createdAt: nowIso,
-          liveUntil: null,
-          evidenceNote: "",
-          files: []
-        });
-        saveState();
-        logConsole("Faith reflection saved into BM.", "bm");
-        closeModal("modalFaithArticle");
-      });
-
-      $("#btnSkipFaithBM").addEventListener("click", () => {
-        closeModal("modalFaithArticle");
-      });
-
-      // --- Intelligence ------------------------------------------------------
-      const intelSearch = $("#intelSearch");
-      const intelList   = $("#intelList");
-      const intelEditor = $("#intelEditor");
-      const intelEditQ  = $("#intelEditQ");
-      const intelEditA  = $("#intelEditA");
-      const btnIntelSave   = $("#btnIntelSave");
-      const btnIntelCancel = $("#btnIntelCancel");
-      let currentIntelIndex = null;
-
-      function renderIntelligenceList() {
-        const term = (intelSearch.value || "").toLowerCase().trim();
-        intelList.innerHTML = "";
-        const items = state.intel || [];
-        if (!items.length) {
-          intelList.innerHTML =
-            '<div style="font-size:12px;opacity:.7;">No stored Q → A yet.</div>';
+      function renderBMList(){
+        els.bmSelectList.innerHTML = "";
+        if(!state.bmPrompts.length){
+          els.bmSelectList.innerHTML =
+            '<div style="margin-top:8px;font-size:12px;opacity:.6;">No BM prompts yet.</div>';
+          els.bmViewer.style.display = "none";
           return;
         }
-        items.forEach((qa, idx) => {
-          const hay = (qa.q + " " + qa.a).toLowerCase();
-          if (term && !hay.includes(term)) return;
-          const row = document.createElement("div");
-          row.style.borderRadius = "12px";
-          row.style.border = "1px solid rgba(15,23,42,.12)";
-          row.style.padding = "8px 10px";
-          row.style.marginBottom = "6px";
-          row.style.cursor = "pointer";
-          row.innerHTML =
-            '<div style="font-weight:800;font-size:13px;">Q: ' +
-            escapeHtml(qa.q) + '</div>' +
-            '<div style="font-size:12px;opacity:.8;margin-top:2px;">A: ' +
-            escapeHtml((qa.a || "").slice(0,140)) +
-            ((qa.a || "").length > 140 ? "…" : "") +
-            "</div>";
-          row.addEventListener("click", () => openIntelEditor(idx));
-          intelList.appendChild(row);
-        });
-      }
+        const q = els.bmSearch ? (els.bmSearch.value || "").trim().toLowerCase() : "";
+        const dateStr = els.bmDate ? (els.bmDate.value || "") : "";
+        let list = state.bmPrompts.slice();
 
-      function openIntelEditor(index) {
-        const qa = state.intel[index];
-        if (!qa) return;
-        currentIntelIndex = index;
-        intelEditQ.value = qa.q || "";
-        intelEditA.value = qa.a || "";
-        intelEditor.style.display = "block";
-      }
-
-      btnIntelSave.addEventListener("click", () => {
-        if (currentIntelIndex == null) return;
-        const q = intelEditQ.value.trim();
-        const a = intelEditA.value.trim();
-        if (!q || !a) {
-          alert("Question and answer are required.");
-          return;
+        // text search
+        if(q){
+          list = list.filter(bm=>{
+            const hay = ((bm.title||"") + " " + (bm.summary||"") + " " + (bm.text||"")).toLowerCase();
+            return hay.includes(q);
+          });
         }
-        state.intel[currentIntelIndex] = { q, a };
-        saveState();
-        intelEditor.style.display = "none";
-        currentIntelIndex = null;
-        renderIntelligenceList();
-      });
-
-      btnIntelCancel.addEventListener("click", () => {
-        intelEditor.style.display = "none";
-        currentIntelIndex = null;
-      });
-
-      intelSearch.addEventListener("input", renderIntelligenceList);
-
-      // --- Seed (Feed) parsing ----------------------------------------------
-      const seedBox   = $("#seedBox");
-      const seedHint  = $("#seedHint");
-      const btnParse  = $("#btnParseSeed");
-      const btnSaveSd = $("#btnSaveSeed");
-      const btnDiscard= $("#btnDiscardSeed");
-      let parsedSeedPairs = [];
-
-      function parseSeed() {
-        const text = seedBox.value || "";
-        parsedSeedPairs = [];
-        if (!text.trim()) {
-          seedHint.textContent = "Block is empty.";
-          return;
-        }
-        const re = /\\item\s*(.+?)\\textbf\{A:\}\s*([\s\S]*?)(?=(\\item|$))/g;
-        let m;
-        while ((m = re.exec(text)) !== null) {
-          const q = m[1].replace(/[\r\n]+/g," ").trim();
-          let a  = (m[2] || "").trim();
-          // Strip optional meta tag at start: [ ... ]
-          a = a.replace(/^\[[^\]]*]\s*/, "");
-          if (q && a) parsedSeedPairs.push({ q, a });
-        }
-        if (!parsedSeedPairs.length) {
-          seedHint.textContent = "No Q → A pairs found.";
-        } else {
-          seedHint.textContent =
-            "Parsed " + parsedSeedPairs.length + " Q → A pairs. Click ‘Save to seed’.";
-        }
-      }
-
-      btnParse.addEventListener("click", parseSeed);
-
-      btnSaveSd.addEventListener("click", () => {
-        if (!parsedSeedPairs.length) parseSeed();
-        if (!parsedSeedPairs.length) return;
-        if (!Array.isArray(state.intel)) state.intel = [];
-        parsedSeedPairs.forEach(p => state.intel.push(p));
-        saveState();
-        renderIntelligenceList();
-        seedHint.textContent = "Saved " + parsedSeedPairs.length + " pairs into intelligence.";
-      });
-
-      btnDiscard.addEventListener("click", () => {
-        seedBox.value = "";
-        parsedSeedPairs = [];
-        seedHint.textContent = "";
-      });
-
-      // --- LLM settings ------------------------------------------------------
-      const offlineStatus = $("#offlineStatus");
-      const offlineBar    = $("#offlineBar");
-      const btnLoadOffline= $("#btnLoadOffline");
-      const apiEndpoint   = $("#apiEndpoint");
-      const apiModel      = $("#apiModel");
-      const apiKey        = $("#apiKey");
-
-      btnLoadOffline.addEventListener("click", () => {
-        offlineStatus.textContent = "checking WebGPU…";
-        if (!("gpu" in navigator)) {
-          offlineStatus.textContent = "WebGPU not available (demo only).";
-          offlineBar.style.width = "0%";
-          return;
-        }
-        offlineStatus.textContent = "loading (demo)…";
-        let pct = 10;
-        offlineBar.style.width = pct + "%";
-        const timer = setInterval(() => {
-          pct += 15;
-          if (pct >= 100) {
-            pct = 100;
-            clearInterval(timer);
-            offlineStatus.textContent =
-              "loaded (wire real WebLLM model here in code).";
+        // calendar date filter
+        if(dateStr){
+          const parts = dateStr.split("-").map(Number);
+          if(parts.length===3 && !Number.isNaN(parts[0])){
+            const start = new Date(parts[0], parts[1]-1, parts[2]).getTime();
+            const end   = start + 24*60*60*1000;
+            list = list.filter(bm=>{
+              const t = bm.createdAt || bm.ts || 0;
+              return t >= start && t < end;
+            });
           }
-          offlineBar.style.width = pct + "%";
-        }, 260);
-      });
-
-      $("#btnSaveLLM").addEventListener("click", () => {
-        state.llm.endpoint = apiEndpoint.value.trim();
-        state.llm.model    = apiModel.value.trim();
-        sessionApiKey      = apiKey.value.trim(); // not stored to localStorage
-        saveState();
-        logConsole("Online helper LLM settings updated (API key kept only this session).", "llm");
-      });
-
-      // --- BM recall, date filter & evidence --------------------------------
-      const bmDateFilter   = $("#bmDateFilter");
-      const btnClearBMFilt = $("#btnClearBMFilter");
-      const bmSelectList   = $("#bmSelectList");
-      const bmViewer       = $("#bmViewer");
-      const bmLockIcon     = $("#bmLockIcon");
-      const bmTitle        = $("#bmTitle");
-      const bmMeta         = $("#bmMeta");
-      const bmTextArea     = $("#bmTextArea");
-      const bmEvidenceArea = $("#bmEvidenceArea");
-      const bmEvidenceInfo = $("#bmEvidenceInfo");
-      const bmFileInput    = $("#bmFileInput");
-      const btnLiveBM      = $("#btnLiveBM");
-      const btnUnlockBM    = $("#btnUnlockBM");
-      const btnCopyPrompt  = $("#btnCopyPrompt");
-      const btnAutoGen     = $("#btnAutoGen");
-      const btnAttachFiles = $("#btnAttachFiles");
-      const btnSaveEvidence= $("#btnSaveEvidence");
-      const btnDeletePrompt= $("#btnDeletePrompt");
-
-      let currentBMIndex = null;
-      let bmPendingFiles = [];
-
-      function ensureSampleBM() {
-        if (!Array.isArray(state.bm)) state.bm = [];
-        if (!state.bm.length) {
-          const nowIso = new Date().toISOString();
-          state.bm.push({
-            id: "sample-" + nowIso,
-            title: "Prototype welcome memory",
-            text:
-              "This is a sample BM entry. Replace it with your own long-form memories, " +
-              "scenes, and important life episodes.",
-            locked: false,
-            createdAt: nowIso,
-            liveUntil: null,
-            evidenceNote: "",
-            files: []
-          });
-          saveState();
         }
-      }
 
-      function dateKeyFromISO(iso) {
-        return (iso || "").slice(0, 10);
-      }
-
-      function renderBMList() {
-        bmSelectList.innerHTML = "";
-        const filterDate = bmDateFilter && bmDateFilter.value ? bmDateFilter.value : "";
-        const items = state.bm || [];
-        if (!items.length) {
-          bmSelectList.innerHTML =
-            '<div style="font-size:12px;opacity:.7;margin-top:6px;">No BM prompts yet.</div>';
-          bmViewer.style.display = "none";
+        if(!list.length){
+          els.bmSelectList.innerHTML =
+            '<div style="margin-top:8px;font-size:12px;opacity:.6;">No BM prompts match this filter.</div>';
+          els.bmViewer.style.display = "none";
           return;
         }
-        let count = 0;
-        items.forEach((bm, idx) => {
-          const dk = dateKeyFromISO(bm.createdAt);
-          if (filterDate && dk !== filterDate) return;
-          count++;
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "btn btnBlue";
-          btn.style.width = "100%";
-          btn.style.display = "flex";
-          btn.style.justifyContent = "space-between";
-          btn.style.alignItems = "center";
-          btn.style.marginTop = "6px";
-          btn.innerHTML =
-            '<span style="font-size:12px;font-weight:800;overflow:hidden;' +
-            'text-overflow:ellipsis;white-space:nowrap;flex:1;">' +
-            (bm.locked ? "🔒 " : "") + escapeHtml(bm.title || "Untitled memory") +
-            "</span>" +
-            '<span style="font-size:11px;opacity:.8;margin-left:8px;">' +
-            escapeHtml(dk || "") + "</span>";
-          btn.addEventListener("click", () => {
-            currentBMIndex = idx;
-            bmPendingFiles = [];
-            updateBMViewer();
-          });
-          bmSelectList.appendChild(btn);
-        });
-        if (!count) {
-          bmSelectList.innerHTML =
-            '<div style="font-size:12px;opacity:.7;margin-top:6px;">' +
-            'No BM entries for this date.</div>';
-          bmViewer.style.display = "none";
-        }
-      }
-
-      function updateEvidenceInfo() {
-        if (currentBMIndex == null) {
-          bmEvidenceInfo.textContent = "";
-          return;
-        }
-        const bm = state.bm[currentBMIndex];
-        const files = bmPendingFiles.length ? bmPendingFiles : (bm.files || []);
-        let txt = "";
-        if (files.length) {
-          const names = files.map(f => f.name).join(", ");
-          txt = "Attached files (names only, local): " + names;
-        } else {
-          txt = "No file metadata stored yet.";
-        }
-        if (bm.evidenceNote && bm.evidenceNote.trim()) {
-          txt += " · Evidence note saved.";
-        }
-        bmEvidenceInfo.textContent = txt;
-      }
-
-      function updateBMViewer() {
-        if (currentBMIndex == null || !state.bm[currentBMIndex]) {
-          bmViewer.style.display = "none";
-          return;
-        }
-        const bm = state.bm[currentBMIndex];
-        bmViewer.style.display = "block";
-        bmTitle.textContent = bm.title || "Untitled memory";
-        const created = bm.createdAt ?
-          new Date(bm.createdAt).toLocaleString() : "";
-        bmMeta.textContent = created;
-        bmLockIcon.textContent = bm.locked ? "🔒" : "🔓";
-        bmTextArea.value = bm.text || "";
-        bmEvidenceArea.value = bm.evidenceNote || "";
         const now = Date.now();
-        if (bm.liveUntil && bm.liveUntil > now) {
-          btnLiveBM.textContent = "Live 12h: on";
-        } else {
-          btnLiveBM.textContent = "Live 12h: off";
-        }
-        btnUnlockBM.style.display = bm.locked ? "inline-block" : "none";
-        updateEvidenceInfo();
-      }
-
-      bmDateFilter && bmDateFilter.addEventListener("change", renderBMList);
-      btnClearBMFilt.addEventListener("click", () => {
-        if (bmDateFilter) bmDateFilter.value = "";
-        renderBMList();
-      });
-
-      btnLiveBM.addEventListener("click", () => {
-        if (currentBMIndex == null) return;
-        const bm = state.bm[currentBMIndex];
-        const now = Date.now();
-        if (bm.liveUntil && bm.liveUntil > now) {
-          bm.liveUntil = null;
-          state.liveBMId = null;
-        } else {
-          bm.liveUntil = now + 12 * 60 * 60 * 1000;
-          state.liveBMId = bm.id;
-        }
-        saveState();
-        updateBMViewer();
-      });
-
-      btnUnlockBM.addEventListener("click", () => {
-        if (currentBMIndex == null) return;
-        if (!confirm("Unlock this BM prompt?")) return;
-        const bm = state.bm[currentBMIndex];
-        bm.locked = false;
-        saveState();
-        updateBMViewer();
-      });
-
-      btnCopyPrompt.addEventListener("click", async () => {
-        if (currentBMIndex == null) return;
-        try {
-          await navigator.clipboard.writeText(bmTextArea.value || "");
-          alert("BM prompt copied.");
-        } catch {
-          alert("Copy failed (clipboard not available).");
-        }
-      });
-
-      btnAutoGen.addEventListener("click", () => {
-        logConsole(
-          "Auto-generate for BM is a placeholder here. Connect this button to an online LLM " +
-          "or local model in code.",
-          "bm"
-        );
-      });
-
-      btnAttachFiles.addEventListener("click", () => {
-        bmFileInput.click();
-      });
-
-      bmFileInput.addEventListener("change", () => {
-        bmPendingFiles = Array.from(bmFileInput.files || []).map(f => ({
-          name: f.name,
-          size: f.size,
-          type: f.type
-        }));
-        updateEvidenceInfo();
-      });
-
-      btnSaveEvidence.addEventListener("click", () => {
-        if (currentBMIndex == null) return;
-        const bm = state.bm[currentBMIndex];
-        bm.evidenceNote = bmEvidenceArea.value || "";
-        if (bmPendingFiles.length) bm.files = bmPendingFiles;
-        saveState();
-        updateEvidenceInfo();
-        logConsole("Evidence updated for BM: " + (bm.title || "Untitled"), "bm");
-        alert("Evidence saved locally for this BM.");
-      });
-
-      btnDeletePrompt.addEventListener("click", () => {
-        if (currentBMIndex == null) return;
-        if (!confirm("Delete this BM prompt?")) return;
-        if (!confirm("Really delete? This cannot be undone.")) return;
-        state.bm.splice(currentBMIndex, 1);
-        currentBMIndex = null;
-        saveState();
-        renderBMList();
-        updateBMViewer();
-      });
-
-      // --- History -----------------------------------------------------------
-      const historyBox     = $("#historyBox");
-      const btnDelRecent   = $("#btnDeleteRecent");
-      const btnDelAll      = $("#btnDeleteAllHist");
-      const btnCopyHistory = $("#btnCopyHistory");
-
-      function pushHistory(role, text) {
-        if (!Array.isArray(state.history)) state.history = [];
-        state.history.push({ role, text, ts: Date.now() });
-        if (state.history.length > 500) state.history.shift();
-        saveState();
-      }
-
-      function renderHistory() {
-        historyBox.innerHTML = "";
-        const items = state.history || [];
-        if (!items.length) {
-          historyBox.innerHTML =
-            '<div style="font-size:12px;opacity:.7;padding:6px 10px;">' +
-            'No history yet.</div>';
-          return;
-        }
-        items.slice().reverse().forEach(entry => {
-          const row = document.createElement("div");
-          row.style.padding = "8px 10px";
-          row.style.borderBottom = "1px solid rgba(15,23,42,.06)";
-          row.innerHTML =
-            '<div style="font-size:11px;opacity:.7;">' +
-            new Date(entry.ts).toLocaleString() + " · " +
-            (entry.role === "user" ? "You" : "AURA-X Ω") +
-            "</div>" +
-            '<div style="font-size:13px;margin-top:2px;white-space:pre-wrap;">' +
-            escapeHtml(entry.text) + "</div>";
-          historyBox.appendChild(row);
+        list.sort((a,b)=>b.ts-a.ts);
+        list.forEach(bm=>{
+          const card = document.createElement("div");
+          card.className = "bmCard";
+          card.style.cursor="pointer";
+          const title = document.createElement("div");
+          title.style.fontWeight="800";
+          title.textContent = bm.title || "(untitled story)";
+          const meta = document.createElement("div");
+          meta.style.fontSize="11px";
+          meta.style.opacity=".7";
+          meta.style.marginTop="2px";
+          const created = bm.createdAt || bm.ts;
+          let txt = new Date(created).toLocaleString() + (bm.locked?" · locked":" · editable");
+          if(bm.repeatCount) txt += " · repeats: "+bm.repeatCount;
+          if(bm.keep) txt += " · keep";
+          if(bm.live && bm.liveUntil){
+            if(bm.liveUntil>now) txt += " · live";
+            else txt += " · live expired";
+          }
+          meta.textContent = txt;
+          card.appendChild(title);
+          card.appendChild(meta);
+          card.addEventListener("click",()=>openBM(bm.id));
+          els.bmSelectList.appendChild(card);
         });
       }
 
-      btnDelRecent.addEventListener("click", () => {
-        if (!Array.isArray(state.history) || !state.history.length) return;
-        if (!confirm("Delete conversation history from last 48 hours?")) return;
-        const cutoff = Date.now() - 48 * 60 * 60 * 1000;
-        state.history = state.history.filter(h => h.ts < cutoff);
-        saveState();
-        renderHistory();
-      });
-
-      btnDelAll.addEventListener("click", () => {
-        if (!Array.isArray(state.history) || !state.history.length) return;
-        if (!confirm("Delete ALL conversation history?")) return;
-        if (!confirm("Really delete everything?")) return;
-        state.history = [];
-        saveState();
-        renderHistory();
-      });
-
-      btnCopyHistory.addEventListener("click", async () => {
-        const items = state.history || [];
-        const txt = items.map(e =>
-          `[${new Date(e.ts).toLocaleString()}] ${e.role.toUpperCase()}: ${e.text}`
-        ).join("\n");
-        try {
-          await navigator.clipboard.writeText(txt);
-          alert("History copied.");
-        } catch {
-          alert("Copy failed (clipboard not available).");
+      let currentBMId = null;
+      function openBM(id){
+        const bm = state.bmPrompts.find(x=>x.id===id);
+        if(!bm) return;
+        currentBMId=id;
+        els.bmViewer.style.display="block";
+        els.bmTitle.textContent = bm.title || "(untitled story)";
+        const now = Date.now();
+        const created = bm.createdAt || bm.ts;
+        let meta = new Date(created).toLocaleString() + (bm.locked?" · locked":" · editable");
+        if(bm.repeatCount) meta += " · repeats: "+bm.repeatCount;
+        if(bm.keep) meta += " · keep";
+        if(bm.live && bm.liveUntil){
+          if(bm.liveUntil>now)
+            meta += " · live until "+new Date(bm.liveUntil).toLocaleTimeString();
+          else
+            meta += " · live expired";
         }
-      });
-
-      // --- Identity ----------------------------------------------------------
-      const idCore    = $("#idCore");
-      const idAnchors = $("#idAnchors");
-      const idRel     = $("#idRelationships");
-      const idStyle   = $("#idStyle");
-      const idLegacy  = $("#idLegacy");
-
-      function restoreIdentityForm() {
-        const id = state.identity || {};
-        idCore.value    = id.core || "";
-        idAnchors.value = id.anchors || "";
-        idRel.value     = id.relationships || "";
-        idStyle.value   = id.style || "";
-        idLegacy.value  = id.legacy || "";
+        els.bmMeta.textContent=meta;
+        els.bmLockIcon.textContent = bm.locked?"🔒":"🔓";
+        els.bmTextArea.value = bm.text || "";
+        els.bmTextArea.readOnly = bm.locked;
+        els.btnUnlockBM.style.display = bm.locked?"inline-flex":"none";
+        els.btnLiveBM.textContent = (bm.live && bm.liveUntil && bm.liveUntil>now)
+          ? "Live 24h: on" : "Live 24h: off";
       }
 
-      $("#btnSaveIdentity").addEventListener("click", () => {
-        state.identity = {
-          core:    idCore.value.trim(),
-          anchors: idAnchors.value.trim(),
-          relationships: idRel.value.trim(),
-          style:   idStyle.value.trim(),
-          legacy:  idLegacy.value.trim()
+      function ensureBMForLastStory(){
+        if(!state.lastStoryInput) return null;
+        if(state.lastStoryBMId) return state.lastStoryBMId;
+        const id = "bm_"+Date.now();
+        const now = Date.now();
+        const obj = {
+          id,
+          title:"Story @ "+new Date().toLocaleString(),
+          summary: state.lastStoryInput.slice(0,180),
+          text: state.lastStoryInput,
+          locked:true,
+          ts: now,
+          createdAt: now,
+          live:false,
+          liveUntil:null,
+          repeatCount:0,
+          keep:false
         };
-        saveState();
-        logConsole("Identity form saved locally (BM-style lock concept).", "id");
-        alert("Identity saved only on this device.");
-      });
-
-      $("#btnClearIdentity").addEventListener("click", () => {
-        if (!confirm("Clear all identity fields on this device?")) return;
-        idCore.value = idAnchors.value = idRel.value =
-          idStyle.value = idLegacy.value = "";
-        state.identity = cloneDefault().identity;
-        saveState();
-      });
-
-      // --- Voice & learning toggles -----------------------------------------
-      const voicePill = $("#voicePill");
-      const learnPill = $("#learnPill");
-
-      function refreshVoicePill() {
-        if (state.settings.voiceEnabled) {
-          voicePill.textContent = "on";
-          voicePill.className = "pillOn";
-        } else {
-          voicePill.textContent = "off";
-          voicePill.className = "pillOff";
-        }
-      }
-
-      function refreshLearnPill() {
-        if (state.settings.learningEnabled) {
-          learnPill.textContent = "on";
-          learnPill.className = "pillOn";
-        } else {
-          learnPill.textContent = "off";
-          learnPill.className = "pillOff";
-        }
-      }
-
-      $("#miVoice").addEventListener("click", () => {
-        state.settings.voiceEnabled = !state.settings.voiceEnabled;
-        refreshVoicePill();
-        saveState();
-      });
-
-      $("#miLearn").addEventListener("click", () => {
-        state.settings.learningEnabled = !state.settings.learningEnabled;
-        refreshLearnPill();
-        saveState();
-      });
-
-      // menu → modals
-      $("#miIntel").addEventListener("click", () => {
-        renderIntelligenceList();
-        openModal("modalIntel");
-        closeOptionsMenu();
-      });
-      $("#miSeed").addEventListener("click", () => {
-        openModal("modalSeed");
-        closeOptionsMenu();
-      });
-      $("#miFaith").addEventListener("click", () => {
-        openModal("modalFaith");
-        closeOptionsMenu();
-      });
-      $("#miIdentity").addEventListener("click", () => {
-        restoreIdentityForm();
-        openModal("modalIdentity");
-        closeOptionsMenu();
-      });
-      $("#miLLM").addEventListener("click", () => {
-        apiEndpoint.value = state.llm.endpoint || defaultState.llm.endpoint;
-        apiModel.value    = state.llm.model    || defaultState.llm.model;
-        apiKey.value      = sessionApiKey;
-        openModal("modalLLM");
-        closeOptionsMenu();
-      });
-      $("#miBMRecall").addEventListener("click", () => {
+        state.bmPrompts.push(obj);
+        state.lastStoryBMId = id;
+        saveBM();
         renderBMList();
-        openModal("modalBM");
-        closeOptionsMenu();
-      });
-      $("#miHistory").addEventListener("click", () => {
-        renderHistory();
-        openModal("modalHistory");
-        closeOptionsMenu();
-      });
+        recomputeBMMetric();
+        updateCapsule();
+        return id;
+      }
 
-      // --- Chat / TM processing ---------------------------------------------
-      function findBestIntelMatch(text) {
-        const items = state.intel || [];
-        if (!items.length) return null;
-        const words = (text || "").toLowerCase().split(/\W+/).filter(Boolean);
-        if (!words.length) return null;
-        let best = null;
-        let bestScore = 0;
-        items.forEach(qa => {
-          const hay = (qa.q + " " + qa.a).toLowerCase();
-          let score = 0;
-          words.forEach(w => {
-            if (hay.includes(w)) score += 1;
-          });
-          score = score / words.length;
-          if (score > bestScore) {
-            bestScore = score;
-            best = qa;
-          }
+      function getActiveLiveBM(){
+        const now=Date.now();
+        const active=state.bmPrompts.filter(bm=>bm.live && bm.liveUntil && bm.liveUntil>now);
+        if(!active.length) return null;
+        active.sort((a,b)=>b.ts-a.ts);
+        return active[0];
+      }
+
+      function maybeUpdateLiveBM(userText,answer){
+        const bm=getActiveLiveBM();
+        if(!bm) return;
+        const trimmed=(userText||"").trim();
+        if(!trimmed || trimmed.length<40) return;
+        const stamp=new Date().toLocaleString();
+
+        bm.repeatCount = (bm.repeatCount || 0) + 1;
+        if (bm.repeatCount >= 1) bm.keep = true;
+        if (bm.repeatCount >= 3) bm.locked = true;
+
+        bm.text = (bm.text||"")+
+          "\n\n[Update @ "+stamp+"]\nYou: "+userText+"\nAURA: "+answer;
+        bm.summary = bm.text.slice(0,180);
+        bm.ts=Date.now();
+        saveBM();
+        renderBMList();
+        if(currentBMId===bm.id) openBM(bm.id);
+      }
+
+      function renderIntelList(){
+        els.intelList.innerHTML="";
+        const q=(els.intelSearch.value||"").toLowerCase();
+        const items=state.intelligence.filter(it=>{
+          if(!q) return true;
+          return it.q.toLowerCase().includes(q) || it.a.toLowerCase().includes(q);
         });
-        if (bestScore < 0.2) return null;
+        if(!items.length){
+          els.intelList.innerHTML=
+            '<div style="margin-top:8px;font-size:12px;opacity:.6;">No intelligence saved yet.</div>';
+          return;
+        }
+        items.forEach(it=>{
+          const card=document.createElement("div");
+          card.className="bmCard";
+          const qEl=document.createElement("div");
+          qEl.style.fontWeight="800";
+          qEl.textContent="Q: "+it.q;
+          const aEl=document.createElement("div");
+          aEl.style.marginTop="4px";
+          aEl.style.fontSize="13px";
+          aEl.textContent="A: "+it.a;
+          const meta=document.createElement("div");
+          meta.style.fontSize="11px";
+          meta.style.opacity=".7";
+          meta.style.marginTop="4px";
+          meta.textContent=it.meta||"";
+          const row=document.createElement("div");
+          row.style.display="flex";
+          row.style.gap="8px";
+          row.style.marginTop="8px";
+          const btnE=document.createElement("button");
+          btnE.className="btn btnBlue";
+          btnE.textContent="Edit";
+          btnE.addEventListener("click",()=>openIntelEditor(it));
+          const btnD=document.createElement("button");
+          btnD.className="btn btnRed";
+          btnD.textContent="Delete";
+          btnD.addEventListener("click",()=>deleteIntel(it.id));
+          row.appendChild(btnE);row.appendChild(btnD);
+          card.appendChild(qEl);card.appendChild(aEl);card.appendChild(meta);card.appendChild(row);
+          els.intelList.appendChild(card);
+        });
+      }
+
+      function openIntelEditor(it){
+        state.editingIntelId=it.id;
+        els.intelEditQ.value=it.q;
+        els.intelEditA.value=it.a;
+        els.intelEditor.style.display="block";
+      }
+      function closeIntelEditor(){
+        state.editingIntelId=null;
+        els.intelEditQ.value="";els.intelEditA.value="";
+        els.intelEditor.style.display="none";
+      }
+      function deleteIntel(id){
+        if(!confirm("Delete this intelligence pair?")) return;
+        state.intelligence = state.intelligence.filter(x=>x.id!==id);
+        saveIntelligence();renderIntelList();
+      }
+
+      function parseSeedBlock(){
+        const text=els.seedBox.value||"";
+        state.parsedSeed=[];
+        if(!text.trim()){ els.seedHint.textContent="No text to parse."; return; }
+        const regex=/\\item\s*(.*?)\s*\\textbf\{A:\}\s*([\s\S]*?)(?=\\item|$)/g;
+        let m;
+        while((m=regex.exec(text))!==null){
+          const q=m[1].replace(/\s+/g," ").trim();
+          const aRaw=m[2].trim();
+          const metaMatch=aRaw.match(/^\[(.*?)\]\s*(.*)$/s);
+          let meta=""; let a=aRaw;
+          if(metaMatch){ meta=metaMatch[1]; a=metaMatch[2].trim(); }
+          if(q && a){
+            state.parsedSeed.push({
+              id:"intel_"+Date.now()+"_"+Math.random().toString(16).slice(2),
+              q,a,meta
+            });
+          }
+        }
+        if(!state.parsedSeed.length)
+          els.seedHint.textContent="No LaTeX-style items detected.";
+        else
+          els.seedHint.textContent="Parsed "+state.parsedSeed.length+" Q→A pairs. Click 'Save to seed'.";
+      }
+      function saveParsedSeed(){
+        if(!state.parsedSeed.length){
+          els.seedHint.textContent="Nothing parsed yet."; return;
+        }
+        state.intelligence = state.intelligence.concat(state.parsedSeed);
+        saveIntelligence();
+        renderIntelList();
+        els.seedHint.textContent="Saved "+state.parsedSeed.length+" pairs into intelligence.";
+        state.parsedSeed=[];
+        els.seedBox.value="";
+      }
+      function discardSeed(){
+        state.parsedSeed=[];els.seedBox.value="";
+        els.seedHint.textContent="Waiting for block…";
+      }
+
+      function findBestIntelMatch(text){
+        const t=text.toLowerCase();
+        let best=null;
+        state.intelligence.forEach(item=>{
+          const q=item.q.toLowerCase();
+          let score=0;
+          if(t===q) score=1;
+          else if(t.includes(q)||q.includes(t)) score=.8;
+          else{
+            const words=t.split(/\s+/);let hits=0;
+            words.forEach(w=>{if(w.length>3 && q.includes(w)) hits++;});
+            score=hits/Math.max(words.length,1);
+          }
+          if(score>0.35 && (!best || score>best.score)) best={item,score};
+        });
         return best;
       }
 
-      function generateReply(text) {
-        const intelHit = findBestIntelMatch(text);
-        if (intelHit) {
-          return intelHit.a;
+      async function callOfflineLLM(text){
+        if(!state.offlineEngine || !window.webllm) return null;
+        try{
+          const messages=[
+            {role:"system",content:"You are AURA-X Ω, an offline emotional continuity assistant. Answer briefly and kindly."},
+            {role:"user",content:text}
+          ];
+          const reply=await state.offlineEngine.chat.completions.create({messages});
+          const msg=reply && reply.choices && reply.choices[0] && reply.choices[0].message && reply.choices[0].message.content;
+          return msg?msg.trim():null;
+        }catch(e){
+          logLine("[offline LLM error] "+e.message);return null;
+        }
+      }
+      async function initOfflineEngine(){
+        if(!window.webllm || state.offlineLoading || state.offlineReady) return;
+        state.offlineLoading=true;
+        els.offlineStatus.textContent="loading…";
+        els.offlineBar.style.width="5%";
+        try{
+          const engine=await window.webllm.CreateMLCEngine(OFFLINE_MODEL_ID,{
+            initProgressCallback:(report)=>{
+              if(!report) return;
+              if(typeof report.progress==="number"){
+                const pct=Math.round(report.progress*100);
+                els.offlineBar.style.width=pct+"%";
+              }
+              if(report.text) els.offlineStatus.textContent=report.text;
+            }
+          });
+          state.offlineEngine=engine;
+          state.offlineReady=true;
+          els.offlineStatus.textContent="ready";
+          els.offlineBar.style.width="100%";
+          saveCfg();
+        }catch(e){
+          console.error(e);
+          els.offlineStatus.textContent="error";
+          els.offlineBar.style.width="0%";
+          state.offlineLoading=false;
+          logLine("[offline LLM] Failed to load model.");
+        }
+      }
+      async function callOnlineLLM(text){
+        const cfg=state.apiConfig;
+        if(!cfg || !cfg.endpoint || !cfg.model || !cfg.key) return null;
+        try{
+          const res=await fetch(cfg.endpoint,{
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              "Authorization":"Bearer "+cfg.key
+            },
+            body:JSON.stringify({
+              model:cfg.model,
+              messages:[
+                {role:"system",content:"You are AURA-X Ω, an emotional continuity assistant. Answer briefly and clearly."},
+                {role:"user",content:text}
+              ]
+            })
+          });
+          if(!res.ok) throw new Error("HTTP "+res.status);
+          const data=await res.json();
+          const msg=data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          return msg?msg.trim():null;
+        }catch(e){
+          logLine("[online LLM error] "+e.message);
+          return null;
+        }
+      }
+
+      // VOICE
+      let cachedVoices=[];
+      if("speechSynthesis" in window){
+        cachedVoices=window.speechSynthesis.getVoices()||[];
+        window.speechSynthesis.onvoiceschanged=()=>{
+          cachedVoices=window.speechSynthesis.getVoices()||[];
+        };
+      }
+      function speakText(text,force){
+        if(!("speechSynthesis" in window)) return;
+        if(!text) return;
+        if(!force && !state.voiceOn) return;
+        try{
+          window.speechSynthesis.cancel();
+          const u=new SpeechSynthesisUtterance(text);
+          u.rate=0.95;u.pitch=0.7;
+          let voices=cachedVoices;
+          if(!voices || !voices.length) voices=window.speechSynthesis.getVoices()||[];
+          const pick=voices.find(v=>
+            /male|old|grand|baritone/i.test((v.name||"") + " " + (v.voiceURI||""))
+          ) || voices[0];
+          if(pick) u.voice=pick;
+          window.speechSynthesis.speak(u);
+        }catch{}
+      }
+
+      function reactionText(base){
+        if(state.mode==="teen"){
+          return base.replace("I won’t accept insults.","Let’s be kind, okay?");
+        }
+        return base;
+      }
+      function faithSoftener(){
+        if(!state.logicFaithSoftener) return "";
+        if(!state.faithSelection.length) return "";
+        return " (Let’s keep words gentle and respectful.)";
+      }
+
+      function getActiveLogic() {
+        const list = state.logicPacks || [];
+        if (!list.length) return null;
+        let idx = state.logicActiveIndex;
+        if (idx == null || idx >= list.length) idx = list.length - 1;
+        return list[idx];
+      }
+      function getRuntimeConfig(){
+        const pack = getActiveLogic();
+        const r = (pack && pack.rules) || {};
+        const cfg = {};
+        cfg.cooldownHits    = r.cooldown && typeof r.cooldown.hits==="number" ? r.cooldown.hits : 3;
+        cfg.cooldownSeconds = r.cooldown && typeof r.cooldown.seconds==="number" ? r.cooldown.seconds : 10;
+        cfg.abuseWords      = Array.isArray(r.abuseWords) && r.abuseWords.length ? r.abuseWords : null;
+        cfg.faithSoftener   = (r.faithSoftener !== false);
+        cfg.mode            = (r.mode==="teen") ? "teen" : "adult";
+        cfg.ui              = r.ui || null;
+        return cfg;
+      }
+      function applyUIFromLogic() {
+        const root = document.documentElement;
+        const runtime = getRuntimeConfig();
+        const ui = runtime.ui;
+        state.mode = runtime.mode;
+        state.logicFaithSoftener = runtime.faithSoftener;
+        if (!ui) {
+          root.style.removeProperty("--accent-color");
+          document.body.classList.remove("theme-golden");
+          if (els.console) els.console.style.boxShadow = "";
+          if (els.faithBubble) els.faithBubble.classList.remove("pulse");
+          return;
+        }
+        if (ui.accentColor) root.style.setProperty("--accent-color", ui.accentColor);
+        else root.style.removeProperty("--accent-color");
+        if (ui.theme === "golden") document.body.classList.add("theme-golden");
+        else document.body.classList.remove("theme-golden");
+        if (ui.consoleGlow && els.console)
+          els.console.style.boxShadow = "0 0 25px rgba(34,197,94,.35)";
+        else if (els.console)
+          els.console.style.boxShadow = "";
+        if (ui.faithBubblePulse && els.faithBubble)
+          els.faithBubble.classList.add("pulse");
+        else if (els.faithBubble)
+          els.faithBubble.classList.remove("pulse");
+      }
+      function refreshLogicUI(){
+        if(!els.logicBox || !els.logicHint || !els.logicSerial) return;
+        const list = state.logicPacks || [];
+        if(!list.length){
+          els.logicBox.value="";
+          els.logicHint.textContent="No logic pack stored. Paste JSON and press Save to add Logic #1.";
+          els.logicSerial.textContent="none";
+          return;
+        }
+        if(state.logicActiveIndex==null || state.logicActiveIndex>=list.length)
+          state.logicActiveIndex = list.length - 1;
+        const idx = state.logicActiveIndex;
+        const pack = list[idx];
+        const n = list.length;
+        els.logicBox.value="";
+        els.logicHint.textContent =
+          "Stored logic packs: " + n +
+          ". Active logic #" + (idx+1) + " (serial " + pack.serial + "). Box kept empty — use Copy to export JSON.";
+        els.logicSerial.textContent = "Logic #" + (idx+1) + " of " + n;
+      }
+
+      function detectAbuse(text){
+        const t=(text||"").toLowerCase();
+        const runtime = getRuntimeConfig();
+        const basePatterns=["stfu","idiot","dumb","trash","f u","fk you"];
+        const patterns = runtime.abuseWords || basePatterns;
+        const hitBasic=patterns.some(p=>t.includes(p.toLowerCase()));
+        const hateTargets=["muslims","hindus","jews","christians","sikhs","buddhists"];
+        const hitHate=t.includes("i hate") && hateTargets.some(g=>t.includes(g));
+        const hitViolence=t.includes("kill") && (t.includes("them")||t.includes("all"));
+        return {hit:hitBasic||hitHate||hitViolence,hate:hitHate,violence:hitViolence};
+      }
+
+      async function generateAnswer(text){
+        let intelBoost=0, llmBoost=0;
+        const best=findBestIntelMatch(text);
+        if(best){
+          intelBoost=0.25+Math.min(best.score,0.4);
+          let ans=best.item.a;
+          ans=reactionText(ans)+faithSoftener();
+          return {answer:ans,source:"INTEL",intelBoost,llmBoost};
+        }
+        if(state.offlineReady && state.offlineEngine){
+          const offline=await callOfflineLLM(text);
+          if(offline){
+            llmBoost=0.3;
+            let ans=reactionText(offline)+faithSoftener();
+            return {answer:ans,source:"OFFLINE",intelBoost,llmBoost};
+          }
+        }
+        const online=await callOnlineLLM(text);
+        if(online){
+          llmBoost=0.35;
+          let ans=reactionText(online)+faithSoftener();
+          return {answer:ans,source:"ONLINE",intelBoost,llmBoost};
+        }
+        let fb="I heard you, but my LLM engines are offline. Configure LLM or teach me via Intelligence for better answers.";
+        fb=reactionText(fb)+faithSoftener();
+        return {answer:fb,source:"BASIC",intelBoost,llmBoost};
+      }
+
+      function maybeTriggerFaithBubble(userText,answer){
+        if(!state.faithSelection.length) return;
+        const combined=(userText+" "+answer).toLowerCase();
+        const longEnough=userText.length>120 || answer.length>160;
+        const emotionalWords=["death","life","fear","hope","dream","future","family","loss","grief","pray","dua","prayer"];
+        const emoHit=emotionalWords.some(w=>combined.includes(w));
+        if(!(longEnough||emoHit)) return;
+        const names=state.faithSelection.map(id=>{
+          const o=FAITH_OPTIONS.find(x=>x.id===id);
+          return o?o.label:id;
+        }).join(" + ");
+        els.faithBubbleTitle.textContent="Faith reflection bubble";
+        els.faithBubbleMeta.textContent="Tap to see "+(names||"selected")+" literature suggestion.";
+        if(state.faithBubbleTimer) clearTimeout(state.faithBubbleTimer);
+        els.faithBubble.classList.add("show");
+        state.lastStoryInput = userText || answer || "";
+        state.lastStoryBMId = null;
+        speakText("Faith suggestion available. Tap the golden bubble if you want a short reflection.",false);
+        state.faithBubbleTimer=setTimeout(()=>{
+          els.faithBubble.classList.remove("show");
+        },5000);
+      }
+      function openFaithArticleFromBubble(){
+        const primary=state.faithSelection[0]||null;
+        let entry=null;
+        if(primary && FAITH_LIBRARY[primary] && FAITH_LIBRARY[primary].length)
+          entry=FAITH_LIBRARY[primary][0];
+        if(!entry){
+          entry={
+            title:"Generic encouragement",
+            short:"",
+            content:"This is a placeholder. Here you can write your own reflection from your tradition."
+          };
+        }
+        state.currentFaithArticle=entry;
+        els.faithArticleTitle.textContent=entry.title;
+        els.faithArticleText.value=entry.content;
+        const names=state.faithSelection.map(id=>{
+          const o=FAITH_OPTIONS.find(x=>x.id===id);
+          return o?o.label:id;
+        }).join(" + ") || "ethics only";
+        els.faithArticleMeta.textContent="Faith lens: "+names;
+        showModal("modalFaithArticle");
+      }
+      function linkFaithArticleToBM(){
+        const text=(els.faithArticleText.value||"").trim();
+        if(!text){ alert("Nothing to add into BM."); return; }
+        const bmId=ensureBMForLastStory();
+        if(!bmId){ alert("No linked BM story. Tell a story first."); return; }
+        const bm=state.bmPrompts.find(x=>x.id===bmId);
+        if(!bm) return;
+        bm.text=(bm.text||"")+"\n\n[Faith reflection]\n"+text;
+        bm.ts=Date.now();
+        saveBM();renderBMList();hideModal("modalFaithArticle");
+        els.faithBubble.classList.remove("show");
+        recomputeBMMetric();updateCapsule();
+      }
+
+      function copyText(text){
+        if(!navigator.clipboard){ alert("Clipboard not available."); return; }
+        navigator.clipboard.writeText(text).catch(()=>{});
+      }
+
+      function hasLastPair(){
+        return !!(state.lastUserQ && state.lastAuraA);
+      }
+
+      /* small-talk / story detection for auto BM */
+      function isGreetingText(t){
+        const low = (t||"").toLowerCase().trim();
+        const shortNoPunc = low.replace(/[^\w\s]/g," ");
+        const patterns = [
+          "hi","hello","hey",
+          "salam","salaam","assalam o alaikum","assalamualaikum","assalamu alaikum",
+          "good morning","good night","how are you","kia hal","kese ho","kese hain"
+        ];
+        return patterns.some(p=>shortNoPunc.includes(p));
+      }
+      function countMeaningfulSentences(t){
+        const parts = (t||"").split(/[\.!\?؟\n]+/).map(s=>s.trim()).filter(s=>s.length>20);
+        return parts.length;
+      }
+      function maybeAutoStoryBMFromUser(text){
+        const trimmed=(text||"").trim();
+        if(!trimmed) return;
+        if(isGreetingText(trimmed)) return;
+
+        const sentences = countMeaningfulSentences(trimmed);
+        if(sentences < 4) return; // کم از کم 4 معنی خیز جملے
+
+        // اگر پہلے سے live BM ہے تو اسی میں add کر دیں
+        const live = getActiveLiveBM();
+        if(live){
+          const stamp = new Date().toLocaleString();
+          live.text = (live.text||"") + "\n\n[User story @ "+stamp+"]\n" + trimmed;
+          live.summary = live.text.slice(0,180);
+          live.repeatCount = (live.repeatCount || 0) + 1;
+          if(live.repeatCount >= 1) live.keep = true;
+          if(live.repeatCount >= 3) live.locked = true;
+          live.ts = Date.now();
+          saveBM();
+          renderBMList();
+          if(currentBMId===live.id) openBM(live.id);
+          recomputeBMMetric();
+          updateCapsule();
+          state.lastStoryInput = trimmed;
+          state.lastStoryBMId = live.id;
+          return;
         }
 
-        const id = state.identity || {};
-        const idLine = id.core ?
-          " I still remember how you described yourself: " + id.core.slice(0,120) + (id.core.length>120?"…":"") :
-          "";
-        return (
-          "Prototype reply (local only). I heard: \"" + text + "\"." +
-          " Right now I am using saved intelligence + simple continuity math, not a full LLM." +
-          idLine
-        );
+        // نیا BM story prompt بنائیں (24h live)
+        const id = "bm_"+Date.now();
+        const now = Date.now();
+        const obj = {
+          id,
+          title: "Story @ " + new Date().toLocaleString(),
+          summary: trimmed.slice(0,180),
+          text: trimmed,
+          locked: false,
+          ts: now,
+          createdAt: now,
+          live: true,
+          liveUntil: now + 24*60*60*1000,
+          repeatCount: 0,
+          keep: false
+        };
+        state.bmPrompts.push(obj);
+        state.lastStoryInput = trimmed;
+        state.lastStoryBMId = id;
+        saveBM();
+        renderBMList();
+        recomputeBMMetric();
+        updateCapsule();
       }
 
-      function handleUserMessage() {
-        const text = userInput.value.trim();
-        if (!text) return;
-        userInput.value = "";
-        pushHistory("user", text);
-        logConsole(text, "you");
+      async function handleUserMessage(){
+        const text=(els.userInput.value||"").trim();
+        if(!text) return;
+        const now=Date.now();
+        const runtime=getRuntimeConfig();
+        if(state.cooldownUntil && now<state.cooldownUntil){
+          const sec=Math.ceil((state.cooldownUntil-now)/1000);
+          logLine("Please wait "+sec+"s and then speak calmly.");
+          speakText("Please wait. Let's restart calmly.",false);
+          return;
+        }
+        els.userInput.value="";
+        addHistory("user",text);renderHistory();
+        appendChat("user", text);
+        state.metrics.TM = scoreTM(text);
+        recomputeBMMetric();updateCapsule();
 
-        const reply = generateReply(text);
-        pushHistory("aura", reply);
-        logConsole(reply, "aura");
+        // auto story BM for long meaningful text
+        maybeAutoStoryBMFromUser(text);
 
-        updateMetricsFromMessage(text);
-        maybeShowFaithBubble(text);
+        const abuse=detectAbuse(text);
+        if(abuse.hit){
+          state.abuseCount=(state.abuseCount||0)+1;
+          if(state.abuseCount>=runtime.cooldownHits){
+            state.cooldownUntil=Date.now()+runtime.cooldownSeconds*1000;
+            state.abuseCount=0;
+            logLine("Cooldown activated for "+runtime.cooldownSeconds+" seconds.");
+            speakText("Cooldown activated. I will help when we stay respectful.",false);
+            return;
+          }
+        }else{
+          state.abuseCount=Math.max(0,(state.abuseCount||0)-1);
+        }
+
+        const {answer,source,intelBoost,llmBoost}=await generateAnswer(text);
+        state.lastAnswerSource=source;
+        state.lastUserQ = text;
+        state.lastAuraA = answer;
+        recomputeE0(intelBoost,llmBoost);updateCapsule();
+        addHistory("aura",answer);renderHistory();
+        appendChat("aura", answer);
+        speakText(answer,false);
+        maybeTriggerFaithBubble(text,answer);
+        maybeUpdateLiveBM(text,answer);
       }
 
-      sendBtn.addEventListener("click", handleUserMessage);
-      userInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();
-          handleUserMessage();
+      function setIdentityEditable(editable){
+        [els.uName,els.uNick,els.uOrigin,els.uPlace,els.uProfession,
+         els.uEmotionalStyle,els.uKeyPeople,els.uLegacyRules]
+         .forEach(f=>{ if(f) f.readOnly=!editable; });
+      }
+      function loadIdentityForm(){
+        const u=state.userIdentity||{};
+        els.uName.value=u.name||"";
+        els.uNick.value=u.nick||"";
+        els.uOrigin.value=u.origin||"";
+        els.uPlace.value=u.place||"";
+        els.uProfession.value=u.profession||"";
+        els.uEmotionalStyle.value=u.emotionalStyle||"";
+        els.uKeyPeople.value=u.keyPeople||"";
+        els.uLegacyRules.value=u.legacyRules||"";
+      }
+      function readIdentityForm(){
+        state.userIdentity={
+          name:els.uName.value||"",
+          nick:els.uNick.value||"",
+          origin:els.uOrigin.value||"",
+          place:els.uPlace.value||"",
+          profession:els.uProfession.value||"",
+          emotionalStyle:els.uEmotionalStyle.value||"",
+          keyPeople:els.uKeyPeople.value||"",
+          legacyRules:els.uLegacyRules.value||"",
+          ts:Date.now()
+        };
+        saveUserIdentity();
+      }
+
+      function applyCfg(cfg){
+        if(!cfg) return;
+        state.voiceOn=!!cfg.voiceOn;
+        state.learningOn=cfg.learningOn!==false;
+        state.faithSelection=Array.isArray(cfg.faithSelection)?cfg.faithSelection:[];
+        state.apiConfig=cfg.apiConfig || {endpoint:"",model:"",key:""};
+        state.offlineReady=!!cfg.offlineReady;
+        els.voicePill.textContent=state.voiceOn?"on":"off";
+        els.voicePill.className=state.voiceOn?"pillOn":"pillOff";
+        els.learnPill.textContent=state.learningOn?"on":"off";
+        els.learnPill.className=state.learningOn?"pillOn":"pillOff";
+        if(state.apiConfig.endpoint) els.apiEndpoint.value=state.apiConfig.endpoint;
+        if(state.apiConfig.model) els.apiModel.value=state.apiConfig.model;
+        if(state.apiConfig.key) els.apiKey.value=state.apiConfig.key;
+      }
+
+      function pruneBM(){
+        let changed=false;
+        const now=Date.now();
+        const monthMs=30*24*60*60*1000;
+        state.bmPrompts = (state.bmPrompts || []).filter(bm=>{
+          const created = bm.createdAt || bm.ts || now;
+          bm.createdAt = created;
+          if (typeof bm.repeatCount !== "number") bm.repeatCount = 0;
+          if (typeof bm.keep !== "boolean") bm.keep = false;
+          if (typeof bm.locked !== "boolean") bm.locked = !!bm.locked;
+
+          if (bm.locked) return true;
+          if (bm.repeatCount >= 1 || bm.keep) {
+            bm.keep = true;
+            return true;
+          }
+          if (now - created > monthMs) {
+            changed=true;
+            return false;
+          }
+          return true;
+        });
+        if(changed) saveBM();
+      }
+
+      function initFromStorage(){
+        const cfg=safeLoadJSON(KEY_CFG,null);
+        const intel=safeLoadJSON(KEY_INT,[]);
+        const bm=safeLoadJSON(KEY_BM,[]);
+        const hist=safeLoadJSON(KEY_HIST,[]);
+        const user=safeLoadJSON(KEY_USER,null);
+        const logicRaw=safeLoadJSON(KEY_LOGIC,null);
+        if(cfg) applyCfg(cfg);
+        state.intelligence=Array.isArray(intel)?intel:[];
+        state.bmPrompts=Array.isArray(bm)?bm:[];
+        state.history=Array.isArray(hist)?hist:[];
+        state.history.forEach(h=>{ if(typeof h.locked!=="boolean") h.locked=false; });
+        state.userIdentity=user;
+        if(logicRaw && Array.isArray(logicRaw.list)){
+          state.logicPacks=logicRaw.list;
+          state.logicActiveIndex=typeof logicRaw.activeIndex==="number"
+            ? logicRaw.activeIndex : (state.logicPacks.length?state.logicPacks.length-1:null);
+        }else if(logicRaw && logicRaw.serial){
+          state.logicPacks=[{
+            serial: logicRaw.serial,
+            rules: logicRaw.rules || {},
+            ts: logicRaw.ts || Date.now()
+          }];
+          state.logicActiveIndex=0;
+        }else{
+          state.logicPacks=[];
+          state.logicActiveIndex=null;
+        }
+        renderFaithChips();
+        renderIntelList();
+        pruneBM();
+        renderBMList();
+        renderHistory();
+        loadIdentityForm();
+        setIdentityEditable(false);
+        recomputeBMMetric();
+        updateCapsule();
+        refreshLogicUI();
+        applyUIFromLogic();
+      }
+
+      // EVENTS
+      els.btnOptions.addEventListener("click",()=>{
+        els.optionsMenu.classList.toggle("show");
+      });
+      document.addEventListener("click",(e)=>{
+        if(!els.optionsMenu.contains(e.target) && !els.btnOptions.contains(e.target))
+          els.optionsMenu.classList.remove("show");
+      });
+
+      els.miVoice.addEventListener("click",()=>{
+        state.voiceOn=!state.voiceOn;
+        els.voicePill.textContent=state.voiceOn?"on":"off";
+        els.voicePill.className=state.voiceOn?"pillOn":"pillOff";
+        saveCfg();
+      });
+      els.miLearn.addEventListener("click",()=>{
+        state.learningOn=!state.learningOn;
+        els.learnPill.textContent=state.learningOn?"on":"off";
+        els.learnPill.className=state.learningOn?"pillOn":"pillOff";
+        saveCfg();
+      });
+      els.miFaith.addEventListener("click",()=>showModal("modalFaith"));
+      els.miIntel.addEventListener("click",()=>showModal("modalIntel"));
+      els.miSeed.addEventListener("click",()=>showModal("modalSeed"));
+      els.miLLM.addEventListener("click",()=>showModal("modalLLM"));
+      els.miBMRecall.addEventListener("click",()=>showModal("modalBM"));
+      els.miHistory.addEventListener("click",()=>showModal("modalHistory"));
+      els.miIdentity.addEventListener("click",()=>{
+        loadIdentityForm();
+        setIdentityEditable(false);
+        showModal("modalIdentity");
+      });
+
+      els.sendBtn.addEventListener("click",handleUserMessage);
+      els.userInput.addEventListener("keydown",(e)=>{
+        if(e.key==="Enter" && !e.shiftKey){
+          e.preventDefault();handleUserMessage();
         }
       });
 
-      // --- Initialisation ----------------------------------------------------
-      function initFromState() {
-        (state.console || []).forEach(appendConsoleLine);
-        if (!state.console.length) {
-          logConsole("AURA-X Ω booted. Emotional continuity engine ready.", "sys");
+      els.intelSearch.addEventListener("input",renderIntelList);
+      els.btnIntelSave.addEventListener("click",()=>{
+        if(!state.editingIntelId) return;
+        const q=(els.intelEditQ.value||"").trim();
+        const a=(els.intelEditA.value||"").trim();
+        if(!q||!a){ alert("Question and answer required."); return; }
+        const idx=state.intelligence.findIndex(x=>x.id===state.editingIntelId);
+        if(idx>=0){
+          state.intelligence[idx].q=q;
+          state.intelligence[idx].a=a;
+          saveIntelligence();renderIntelList();
         }
-        updateMetricsDisplay();
-        refreshVoicePill();
-        refreshLearnPill();
-        renderFaithChips();
-        renderIntelligenceList();
-        ensureSampleBM();
-        renderBMList();
+        closeIntelEditor();
+      });
+      els.btnIntelCancel.addEventListener("click",closeIntelEditor);
+
+      els.btnParseSeed.addEventListener("click",parseSeedBlock);
+      els.btnSaveSeed.addEventListener("click",saveParsedSeed);
+      els.btnDiscardSeed.addEventListener("click",discardSeed);
+
+      if(els.btnValidateLogic){
+        els.btnValidateLogic.addEventListener("click",()=>{
+          const raw=els.logicBox.value||"";
+          if(!raw.trim()){ els.logicHint.textContent="Nothing to validate."; return; }
+          try{
+            const obj=JSON.parse(raw);
+            const keys=Object.keys(obj||{});
+            els.logicHint.textContent="Valid JSON with "+keys.length+" root key(s).";
+          }catch(e){
+            els.logicHint.textContent="Invalid JSON: "+e.message;
+          }
+        });
+      }
+      if(els.btnSaveLogic){
+        els.btnSaveLogic.addEventListener("click",()=>{
+          const raw=els.logicBox.value||"";
+          if(!raw.trim()){ els.logicHint.textContent="Nothing to save.";return; }
+          let obj;
+          try{ obj=JSON.parse(raw); }
+          catch(e){ els.logicHint.textContent="Invalid JSON: "+e.message;return; }
+          if(!confirm("Save this logic pack? It will control behaviour until you delete it.")) return;
+          const serial="LP-"+new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14);
+          const pack={ serial, rules:obj, ts:Date.now() };
+          state.logicPacks = state.logicPacks || [];
+          state.logicPacks.push(pack);
+          state.logicActiveIndex = state.logicPacks.length-1;
+          persistLogicState();
+          refreshLogicUI();
+          applyUIFromLogic();
+          els.logicBox.value="";
+        });
+      }
+      if(els.btnCopyLogic){
+        els.btnCopyLogic.addEventListener("click",()=>{
+          const list=state.logicPacks||[];
+          if(list.length){
+            const idx = state.logicActiveIndex==null ? (list.length-1) : state.logicActiveIndex;
+            const pack=list[idx];
+            const text="// Logic #"+(idx+1)+" of "+list.length+
+              ", serial: "+pack.serial+"\n"+JSON.stringify(pack.rules,null,2);
+            copyText(text);
+            els.logicHint.textContent="Active logic #"+(idx+1)+" copied with serial.";
+          }else{
+            const raw=els.logicBox.value||"";
+            if(!raw.trim()){ els.logicHint.textContent="No logic or text to copy.";return; }
+            copyText(raw);
+            els.logicHint.textContent="Current box text copied (no stored pack).";
+          }
+        });
+      }
+      if(els.btnDeleteLogic){
+        els.btnDeleteLogic.addEventListener("click",()=>{
+          const list=state.logicPacks||[];
+          if(!list.length && !(els.logicBox.value||"").trim()){
+            els.logicHint.textContent="No logic pack to delete.";return;
+          }
+          if(!confirm("Delete active logic pack?")) return;
+          if(!confirm("Are you sure? This cannot be undone.")) return;
+          if(list.length){
+            const idx= state.logicActiveIndex==null ? (list.length-1) : state.logicActiveIndex;
+            list.splice(idx,1);
+            if(!list.length){
+              state.logicActiveIndex=null;
+            }else if(idx>=list.length){
+              state.logicActiveIndex=list.length-1;
+            }else{
+              state.logicActiveIndex=idx;
+            }
+            state.logicPacks=list;
+            persistLogicState();
+          }
+          els.logicBox.value="";
+          els.logicHint.textContent="Logic pack deleted.";
+          els.logicSerial.textContent="none";
+          applyUIFromLogic();
+        });
       }
 
-      initFromState();
-    })();
+      els.btnLoadOffline.addEventListener("click",initOfflineEngine);
+      els.btnSaveLLM.addEventListener("click",()=>{
+        state.apiConfig={
+          endpoint:els.apiEndpoint.value.trim(),
+          model:els.apiModel.value.trim(),
+          key:els.apiKey.value.trim()
+        };
+        saveCfg();
+        logLine("[LLM] Online helper settings saved.");
+      });
+
+      if(els.btnUnlockBM){
+        els.btnUnlockBM.addEventListener("click",()=>{
+          if(!currentBMId) return;
+          if(!confirm("Unlock this BM prompt for editing?")) return;
+          const bm=state.bmPrompts.find(x=>x.id===currentBMId);
+          if(!bm) return;
+          bm.locked=false;saveBM();openBM(currentBMId);
+        });
+      }
+      if(els.btnLiveBM){
+        els.btnLiveBM.addEventListener("click",()=>{
+          if(!currentBMId) return;
+          const bm=state.bmPrompts.find(x=>x.id===currentBMId);
+          if(!bm) return;
+          const now=Date.now();
+          if(!bm.live || !bm.liveUntil || bm.liveUntil<=now){
+            bm.live=true;bm.liveUntil=now+24*60*60*1000;
+          }else{
+            bm.live=false;bm.liveUntil=null;
+          }
+          saveBM();openBM(currentBMId);
+        });
+      }
+
+      els.btnCopyPrompt.addEventListener("click",()=>{
+        const txt=els.bmTextArea.value||""; if(!txt) return; copyText(txt);
+        showToast("Copied");
+        if(currentBMId){
+          const bm=state.bmPrompts.find(x=>x.id===currentBMId);
+          if(bm){
+            bm.repeatCount = (bm.repeatCount || 0) + 1;
+            if (bm.repeatCount >= 1) bm.keep = true;
+            if (bm.repeatCount >= 3) bm.locked = true;
+            bm.ts = Date.now();
+            saveBM();
+            renderBMList();
+            openBM(currentBMId);
+          }
+        }
+      });
+      els.btnAutoGen.addEventListener("click",()=>{
+        logLine("[BM] Auto generation can be wired later.");
+      });
+      els.btnDeletePrompt.addEventListener("click",()=>{
+        if(!currentBMId) return;
+        if(!confirm("Delete this BM prompt?")) return;
+        if(!confirm("Are you sure? This cannot be undone.")) return;
+        state.bmPrompts = state.bmPrompts.filter(x=>x.id!==currentBMId);
+        saveBM();renderBMList();els.bmViewer.style.display="none";currentBMId=null;
+        recomputeBMMetric();updateCapsule();
+      });
+      if(els.bmSearch){
+        els.bmSearch.addEventListener("input",renderBMList);
+      }
+      if(els.bmDate){
+        els.bmDate.addEventListener("change",renderBMList);
+      }
+
+      els.btnDeleteRecent.addEventListener("click",()=>{
+        if(!confirm("Delete history for last 48h? Locked items stay.")) return;
+        const cutoff = Date.now() - 48*60*60*1000;
+        state.history = state.history.filter(h => h.locked || h.ts < cutoff);
+        saveHistory();renderHistory();
+      });
+      els.btnDeleteAllHist.addEventListener("click",()=>{
+        if(!confirm("Delete ALL unlocked history? Locked items stay.")) return;
+        if(!confirm("Are you completely sure?")) return;
+        state.history = state.history.filter(h=>h.locked);
+        saveHistory();renderHistory();
+      });
+      els.btnCopyHistory.addEventListener("click",()=>{
+        const lines=state.history.map(h=>{
+          const dt=new Date(h.ts).toISOString();
+          const label=h.role==="user"?"You":(h.role==="aura"?"AURA":h.role);
+          return `[${dt}] ${label}: ${h.text}${h.locked ? " [locked]" : ""}`;
+        }).join("\n");
+        if(!lines) return; copyText(lines);
+        showToast("History copied");
+      });
+
+      els.btnEditIdentity.addEventListener("click",()=>setIdentityEditable(true));
+      els.btnSaveUserIdentity.addEventListener("click",()=>{
+        readIdentityForm();setIdentityEditable(false);logLine("[identity] Saved on this device.");
+      });
+      els.btnDeleteUserIdentity.addEventListener("click",()=>{
+        if(!confirm("Delete stored identity?")) return;
+        if(!confirm("Are you sure? This cannot be undone.")) return;
+        state.userIdentity=null;saveUserIdentity();
+        loadIdentityForm();setIdentityEditable(false);
+      });
+
+      els.faithBubble.addEventListener("click",e=>{
+        if(e.target===els.faithBubbleClose){
+          els.faithBubble.classList.remove("show");return;
+        }
+        openFaithArticleFromBubble();
+      });
+      els.btnCopyFaithArticle.addEventListener("click",()=>{
+        const txt=els.faithArticleText.value||""; if(!txt) return; copyText(txt);
+        showToast("Copied");
+      });
+      els.btnAddFaithToBM.addEventListener("click",linkFaithArticleToBM);
+      els.btnSkipFaithBM.addEventListener("click",()=>{
+        hideModal("modalFaithArticle");els.faithBubble.classList.remove("show");
+      });
+
+      /* reaction icons behaviour */
+      if(els.btnCopyLast){
+        els.btnCopyLast.addEventListener("click",()=>{
+          if(!hasLastPair()){ logLine("No recent answer to copy."); return; }
+          copyText(state.lastAuraA);
+          showToast("Copied");
+        });
+      }
+      if(els.btnLikeLast){
+        els.btnLikeLast.addEventListener("click",()=>{
+          if(!hasLastPair()){ logLine("No recent answer to save."); return; }
+          if(!state.learningOn){
+            logLine("Learning is OFF. Turn Learning → ON in Options to save answers.");
+            return;
+          }
+          const id="intel_"+Date.now()+"_"+Math.random().toString(16).slice(2);
+          const meta="[user-like] source="+(state.lastAnswerSource||"unknown")+"; E0="+state.metrics.E0.toFixed(3);
+          state.intelligence.push({id,q:state.lastUserQ,a:state.lastAuraA,meta});
+          saveIntelligence();
+          renderIntelList();
+          showToast("Saved");
+        });
+      }
+      if(els.btnDislikeLast){
+        els.btnDislikeLast.addEventListener("click",()=>{
+          if(!hasLastPair()){ logLine("No recent answer to correct."); return; }
+          if(!state.learningOn){
+            logLine("Learning is OFF. Turn Learning → ON in Options to correct answers.");
+            return;
+          }
+          const replacement = prompt("Type the correct answer I should learn for this question:", "");
+          if(!replacement || !replacement.trim()){
+            return;
+          }
+          const id="intel_"+Date.now()+"_"+Math.random().toString(16).slice(2);
+          const meta="[user-corrected] source="+(state.lastAnswerSource||"unknown")+"; E0="+state.metrics.E0.toFixed(3);
+          state.intelligence.push({id,q:state.lastUserQ,a:replacement.trim(),meta});
+          saveIntelligence();
+          renderIntelList();
+          showToast("Updated");
+        });
+      }
+      if(els.btnSpeakLast){
+        els.btnSpeakLast.addEventListener("click",()=>{
+          if(!hasLastPair()){ logLine("No recent answer to speak."); return; }
+          speakText(state.lastAuraA,true);
+        });
+      }
+      if(els.btnShareLast){
+        els.btnShareLast.addEventListener("click",()=>{
+          if(!hasLastPair()){ logLine("No recent pair to copy."); return; }
+          const block="Q: "+state.lastUserQ+"\nA: "+state.lastAuraA;
+          copyText(block);
+          showToast("Copied");
+        });
+      }
+
+      initFromStorage();
+      // console clean start; no auto welcome line
+    });
   </script>
 </body>
 </html>
