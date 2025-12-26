@@ -11,9 +11,7 @@
   </script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    :root {
-      --accent-color: #0ea5e9; /* default accent */
-    }
+    :root { --accent-color:#0ea5e9; }
     body{
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       background:
@@ -39,6 +37,7 @@
       padding:20px 18px 10px;
       border-bottom:1px solid rgba(148,163,184,.14);
       text-align:center;
+      position:relative;
     }
     .brand{
       font-weight:800;
@@ -57,13 +56,45 @@
       max-width:720px;
       border:1px solid rgba(251,191,36,.35);
       border-radius:14px;
-      padding:12px 14px;
+      padding:10px 36px 9px 14px;
       color:#fbbf24;
       background:rgba(2,6,23,.35);
       box-shadow:inset 0 0 0 1px rgba(251,191,36,.08);
       font-size:14px;
-      line-height:1.45;
+      line-height:1.4;
+      position:relative;
+      overflow:hidden;
+      transition:background .4s ease,border-color .4s ease,transform .4s ease,box-shadow .4s ease;
     }
+    .ethicMain{font-weight:600;}
+    .ethicMeta{
+      font-size:11px;
+      opacity:.8;
+      margin-top:2px;
+      display:none; /* ✅ meta line default hidden */
+    }
+    .ethic.ethicPulse{
+      animation:ethicPulse 1.1s ease;
+    }
+    @keyframes ethicPulse{
+      0%{box-shadow:0 0 0 0 rgba(251,191,36,.55);transform:translateY(0);}
+      45%{box-shadow:0 0 0 16px rgba(251,191,36,0);transform:translateY(-1px);}
+      100%{box-shadow:0 0 0 0 rgba(251,191,36,0);transform:translateY(0);}
+    }
+    .faithCfgBtn{
+      position:absolute;
+      right:6px;
+      top:4px;
+      border:none;
+      background:transparent;
+      color:#fde68a;
+      cursor:pointer;
+      font-size:16px;
+      line-height:1;
+      display:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .faithCfgBtn.show{display:inline-flex;}
     .pill{
       margin:10px auto 0;
       max-width:760px;
@@ -76,6 +107,12 @@
       padding:14px 16px;
       text-transform:uppercase;
       box-shadow:0 12px 40px rgba(14,165,233,.22);
+      position:relative;
+    }
+    .pill.faithGlow{
+      border-color:rgba(251,191,36,.9);
+      box-shadow:0 0 26px rgba(251,191,36,.75);
+      background:linear-gradient(90deg, rgba(14,165,233,.6), rgba(251,191,36,.9));
     }
     .main{ padding:16px 16px 18px }
     .row{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch}
@@ -120,16 +157,9 @@
       white-space:pre-wrap;
     }
     .line{display:block;margin:2px 0}
-    /* colored tags for conversation */
-    .console .youTag{
-      color:#bfdbfe;
-      font-weight:700;
-    }
-    .console .auraTag{
-      color:#a7f3d0;
-      font-weight:700;
-    }
-
+    .line.user{color:#a5b4fc;}
+    .line.aura{color:#bbf7d0;}
+    .line.sys{color:#fbbf24;font-size:12px;}
     .optionsMenu{
       position:fixed;
       left:12px;
@@ -219,10 +249,8 @@
       border:1px solid rgba(148,163,184,.14);
       background:rgba(2,6,23,.45);
     }
-
-    /* reaction bar ABOVE metrics + left aligned */
     .reactionBar{
-      margin-top:4px;
+      margin-top:0;
       margin-bottom:6px;
       display:flex;
       align-items:center;
@@ -243,14 +271,13 @@
       -webkit-tap-highlight-color:transparent;
     }
     .reactBtn:active{transform:scale(.9)}
-
     .liveCapsule{
       margin:4px 0 10px;
       width:100%;
       border-radius:999px;
       border:1px solid rgba(148,163,184,.18);
       background:rgba(2,6,23,.55);
-      padding:10px 12px;
+      padding:8px 12px;
       display:flex;
       gap:10px;
       flex-wrap:wrap;
@@ -276,6 +303,7 @@
       cursor:pointer;
       box-shadow:0 10px 24px rgba(0,0,0,.35);
       transition:opacity .25s ease, transform .25s ease;
+      width:100%;
     }
     .faithBubble.show{
       display:flex;
@@ -295,18 +323,25 @@
       padding:0 4px;
       line-height:1;
     }
-    /* Golden theme from logic */
-    body.theme-golden .ethic{
-      border-color: rgba(251,191,36,.7);
-      background: rgba(251,191,36,.06);
-    }
-    /* Faith bubble pulse animation from logic */
     .faithBubble.pulse{
       animation: faithPulse 1.4s infinite;
+    }
+    .faithBubble.flying{
+      animation: faithFlyUp 2.1s ease-in-out forwards, faithBlink 1s ease-in-out 0s 2;
     }
     @keyframes faithPulse{
       0%   { box-shadow: 0 0 0 0 rgba(251,191,36,.55); }
       100% { box-shadow: 0 0 0 18px rgba(251,191,36,0); }
+    }
+    @keyframes faithFlyUp{
+      0%   { transform:translateY(0); opacity:1; }
+      60%  { transform:translateY(-140px); opacity:1; }
+      100% { transform:translateY(-180px); opacity:0; }
+    }
+    @keyframes faithBlink{
+      0%{box-shadow:0 0 0 0 rgba(251,191,36,.4);}
+      50%{box-shadow:0 0 18px 4px rgba(251,191,36,.95);}
+      100%{box-shadow:0 0 0 0 rgba(251,191,36,0);}
     }
     .inputRow{display:flex;gap:10px;align-items:flex-end}
     .input{
@@ -340,7 +375,27 @@
       font-family:ui-monospace,Menlo,Consolas,monospace;
       color:#dbeafe;
     }
-
+    .toastBubble{
+      position:fixed;
+      bottom:18px;
+      left:50%;
+      transform:translate(-50%,10px);
+      padding:6px 14px;
+      border-radius:999px;
+      background:rgba(15,23,42,.95);
+      color:#e5e7eb;
+      font-size:12px;
+      border:1px solid rgba(148,163,184,.4);
+      box-shadow:0 12px 30px rgba(0,0,0,.5);
+      opacity:0;
+      pointer-events:none;
+      z-index:10000;
+      transition:opacity .18s ease, transform .18s ease;
+    }
+    .toastBubble.show{
+      opacity:1;
+      transform:translate(-50%,0);
+    }
     .modalOverlay{
       position:fixed;
       inset:0;
@@ -470,11 +525,32 @@
       line-height:1.4;
       margin-top:6px;
     }
-
-    /* Conversation history – lighter UI + lock icon */
-    #modalHistory .modalBody{
-      background:#f8fafc;
+    .intelCard{
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,.12);
+      background:#f9fafb;
+      padding:10px;
+      margin-top:8px;
+      font-size:13px;
     }
+    .intelTop{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:4px;
+    }
+    .intelQ{font-weight:700;}
+    .intelA{margin-top:2px;white-space:pre-wrap;}
+    .intelMeta{font-size:11px;opacity:.65;margin-top:2px;}
+    .intelButtons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px;}
+    .intelEditBlock{
+      margin-top:8px;
+      border-radius:10px;
+      border:1px dashed rgba(15,23,42,.18);
+      padding:8px;
+      background:#fff;
+    }
+    #modalHistory .modalBody{background:#f8fafc;}
     #historyBox{
       margin-top:4px;
       border-radius:14px;
@@ -495,10 +571,7 @@
       justify-content:space-between;
       gap:6px;
     }
-    .historyText{
-      flex:1;
-      white-space:pre-wrap;
-    }
+    .historyText{flex:1;white-space:pre-wrap;}
     .historyLock{
       border:none;
       background:transparent;
@@ -507,31 +580,93 @@
       line-height:1;
       padding:0 2px;
     }
-
-    /* small toast bubble */
-    .toast{
-      position:fixed;
-      bottom:18px;
-      left:50%;
-      transform:translateX(-50%);
-      background:rgba(15,23,42,.96);
-      color:#e5e7eb;
-      padding:6px 14px;
-      border-radius:999px;
-      border:1px solid rgba(148,163,184,.45);
+    .bmItem{
+      margin-top:6px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.5);
+      background:#f9fafb;
+      cursor:pointer;
       font-size:12px;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .18s ease, transform .18s ease;
-      z-index:99999;
+      display:flex;
+      justify-content:space-between;
+      gap:6px;
     }
-    .toast.show{
-      opacity:1;
-      transform:translateX(-50%) translateY(-4px);
+    .bmItemTitle{font-weight:700;}
+    .bmItemMeta{opacity:.65;font-size:11px;}
+    #dreamOverlay{
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(circle at 10% 0%, #020617 0, transparent 45%),
+        radial-gradient(circle at 90% 0, #0ea5e9 0, transparent 45%),
+        rgba(2,6,23,.96);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9500;
+      backdrop-filter:blur(16px);
     }
-
-    .@media-fix{} /* dummy to keep structure clean */
-
+    #dreamOverlay.show{display:flex;}
+    .dreamInner{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:16px;
+      text-align:center;
+      padding:20px 18px;
+    }
+    .dreamOrb{
+      width:120px;
+      height:120px;
+      border-radius:999px;
+      background:
+        radial-gradient(circle at 30% 20%, #ffffff, #7dd3fc 40%, transparent 70%);
+      border:2px solid rgba(125,211,252,.9);
+      box-shadow:0 0 40px rgba(56,189,248,.8);
+      animation:dreamPulse 3.5s ease-in-out infinite;
+    }
+    .dreamTitle{
+      font-weight:800;
+      font-size:18px;
+      color:#e0f2fe;
+    }
+    .dreamSub{
+      max-width:420px;
+      font-size:13px;
+      color:#bae6fd;
+      opacity:.9;
+    }
+    .dreamMeta{
+      margin-top:4px;
+      font-size:11px;
+      color:#93c5fd;
+      opacity:.85;
+    }
+    @keyframes dreamPulse{
+      0%{transform:translateY(0) scale(1);}
+      50%{transform:translateY(-6px) scale(1.03);}
+      100%{transform:translateY(0) scale(1);}
+    }
+    #imagePreviewArea{
+      display:none;
+      margin:6px 2px 2px;
+      text-align:center;
+      font-size:10px;
+      opacity:.8;
+    }
+    #imgPrev{
+      max-height:90px;
+      border-radius:10px;
+      border:2px solid var(--accent-color);
+      margin-bottom:2px;
+    }
+    body.theme-golden .ethic{
+      border-color: rgba(251,191,36,.7);
+      background: rgba(251,191,36,.06);
+    }
+    .@media-fix{}
     @media (max-width:760px){
       .console{height:240px}
       .optionsMenu{top:112px}
@@ -546,19 +681,10 @@
         padding:7px;
         grid-template-columns:repeat(3,minmax(0,1fr));
       }
-      .menuItem{
-        min-height:52px;
-        padding:6px 4px;
-      }
+      .menuItem{min-height:52px;padding:6px 4px;}
       .menuLeft{font-size:11px}
-      .pillOn,.pillOff,.pillMid{
-        font-size:9.5px;
-        padding:4px 6px;
-      }
-      .reactionBar{
-        font-size:16px;
-        gap:8px;
-      }
+      .pillOn,.pillOff,.pillMid{font-size:9.5px;padding:4px 6px;}
+      .reactionBar{font-size:16px;gap:8px;}
     }
   </style>
 </head>
@@ -570,9 +696,13 @@
         Offline emotional continuity engine (prototype)<br>
         TM = user inputs only · Internal layers keep continuity and emotional trajectory.
       </div>
-      <div class="ethic">
-        Universal ethic: avoid actions that grow negative emotions in you or others.
-        Move gently toward choices that increase shared positive feeling for everyone.
+      <div class="ethic" id="ethicBox">
+        <div class="ethicMain" id="ethicMain">
+          Universal ethic: avoid actions that grow negative emotions in you or others.
+          Move gently toward choices that increase shared positive feeling for everyone.
+        </div>
+        <div class="ethicMeta" id="ethicMeta"></div><!-- ✅ empty by default -->
+        <button id="faithCfgBtn" class="faithCfgBtn" title="Faith live bar settings">🔘</button>
       </div>
       <div class="pill">EMOTIONAL CONTINUITY ENGINE — ACTIVE</div>
     </div>
@@ -634,13 +764,11 @@
         <!-- RIGHT -->
         <div class="rightCol">
           <div class="chatWrap">
-            <!-- reaction bar ABOVE metrics, left-aligned -->
             <div class="reactionBar" id="reactionBar">
-              <button class="reactBtn" id="btnCopyLast" title="Copy last answer">⧉</button>
-              <button class="reactBtn" id="btnLikeLast" title="Save to Intelligence">👍</button>
-              <button class="reactBtn" id="btnDislikeLast" title="Correct answer">👎</button>
+              <button class="reactBtn" id="btnLikeLast" title="Save to Intelligence (like)">👍</button>
+              <button class="reactBtn" id="btnDislikeLast" title="Mark incorrect & teach new answer">👎</button>
               <button class="reactBtn" id="btnSpeakLast" title="Play voice for last answer">🔊</button>
-              <button class="reactBtn" id="btnShareLast" title="Copy Q + A">🔗</button>
+              <button class="reactBtn" id="btnShareLast" title="Copy question + answer">🔗</button>
             </div>
             <div class="liveCapsule">
               <span><b>E0</b>: <span id="cE0">0.000</span></span><span>·</span>
@@ -657,8 +785,16 @@
               <button class="fbClose" id="faithBubbleClose">×</button>
             </div>
             <div class="inputRow">
+              <label class="reactBtn" style="cursor:pointer;margin-bottom:12px;">
+                📷
+                <input type="file" id="visionInput" accept="image/*" style="display:none">
+              </label>
               <input class="input" id="userInput" placeholder="Talk to AURA-X Ω… (TM = your inputs)" />
               <button class="send" id="sendBtn">Send</button>
+            </div>
+            <div id="imagePreviewArea">
+              <img id="imgPrev" alt="preview">
+              <div>Image attached for analysis</div>
             </div>
             <div class="formula">
               E₀ = tanh( R(TM,BM) + I(TM) + I<sub>intel</sub> + I<sub>LLM</sub> − D + λ<sub>faith</sub> + λ<sub>sys</sub> + λ<sub>trc</sub> )
@@ -668,10 +804,19 @@
       </div>
     </div>
   </div>
-
-  <!-- toast bubble -->
-  <div class="toast" id="toast"></div>
-
+  <!-- Toast bubble -->
+  <div class="toastBubble" id="toastBubble"></div>
+  <!-- Dream overlay / screensaver -->
+  <div id="dreamOverlay">
+    <div class="dreamInner">
+      <div class="dreamOrb"></div>
+      <div class="dreamText">
+        <div class="dreamTitle">AURA-X Ω is dreaming…</div>
+        <div class="dreamSub">Your BM snapshots and recent feelings are drifting in the background. Tap anywhere to wake.</div>
+        <div class="dreamMeta" id="dreamMetaText"></div>
+      </div>
+    </div>
+  </div>
   <!-- Faith selection -->
   <div class="modalOverlay" id="modalFaith">
     <div class="modal">
@@ -688,7 +833,40 @@
       </div>
     </div>
   </div>
-
+  <!-- Faith live bar settings -->
+  <div class="modalOverlay" id="modalFaithCfg">
+    <div class="modal">
+      <div class="modalHeader">
+        <div>🔘 Faith live bar settings<br><small id="faithCfgFaithTitle">Configure literature & translation.</small></div>
+        <button class="closeX" data-close="modalFaithCfg">×</button>
+      </div>
+      <div class="modalBody" style="background:#fefce8;">
+        <div style="font-size:13px;margin-bottom:8px;">
+          Faith: <span id="faithCfgFaithName" style="font-weight:800;"></span>
+        </div>
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <input type="checkbox" id="faithCfgEnable" checked />
+          <span>Show live religious literature bar (instead of generic line)</span>
+        </label>
+        <div style="margin-top:4px;">
+          <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Translation language</label>
+          <select id="faithCfgLang"
+            style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;background:#fff;">
+            <option value="auto">Auto (device / location)</option>
+            <option value="urdu">Urdu</option>
+            <option value="english">English</option>
+          </select>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;">
+          <button class="btn btnBlue" id="faithCfgSave">Save</button>
+        </div>
+        <div style="font-size:11px;opacity:.65;margin-top:6px;">
+          After saving, the small 🔘 button will disappear. To adjust later, select a different faith once,
+          then come back to this faith – the button will appear again.
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Faith article -->
   <div class="modalOverlay" id="modalFaithArticle">
     <div class="modal">
@@ -703,13 +881,12 @@
           style="width:100%;min-height:160px;border-radius:14px;border:1px solid rgba(15,23,42,.18);padding:10px;font-size:13px;line-height:1.4;background:#fff;"></textarea>
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
           <button class="btn btnBlue" id="btnCopyFaithArticle">Copy</button>
-          <button class="btn btnBlue" id="btnAddFaithToBM">Add under BM prompt</button>
+          <button class="btn btnBlue" id="btnExportFaithArticle">Export</button>
           <button class="btn btnRed" id="btnSkipFaithBM">Skip</button>
         </div>
       </div>
     </div>
   </div>
-
   <!-- Intelligence -->
   <div class="modalOverlay" id="modalIntel">
     <div class="modal">
@@ -721,19 +898,10 @@
         <input id="intelSearch"
           style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:10px 12px;font-size:14px;outline:none"
           placeholder="Search intelligence..." />
-        <div id="intelEditor" style="margin-top:10px;display:none;">
-          <input id="intelEditQ" class="intelEditInput" placeholder="Question" />
-          <textarea id="intelEditA" class="intelEditArea" placeholder="Answer"></textarea>
-          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-            <button class="btn btnBlue" id="btnIntelSave">Save</button>
-            <button class="btn btnRed" id="btnIntelCancel">Cancel</button>
-          </div>
-        </div>
         <div id="intelList" style="margin-top:10px;"></div>
       </div>
     </div>
   </div>
-
   <!-- Seed + Logic -->
   <div class="modalOverlay" id="modalSeed">
     <div class="modal">
@@ -787,7 +955,6 @@
       </div>
     </div>
   </div>
-
   <!-- LLM -->
   <div class="modalOverlay" id="modalLLM">
     <div class="modal">
@@ -837,26 +1004,22 @@
       </div>
     </div>
   </div>
-
   <!-- BM Recall -->
   <div class="modalOverlay" id="modalBM">
     <div class="modal">
       <div class="modalHeader">
-        <div>📘 Recall from BM<br><small>Long stories / scenes only.</small></div>
+        <div>📘 Recall from BM<br><small>Only long stories and scenes (photo/video-ready).</small></div>
         <button class="closeX" data-close="modalBM">×</button>
       </div>
       <div class="modalBody">
         <div style="font-size:13px;opacity:.75">
           Select a BM prompt. Locked prompts must be unlocked first. Delete needs double confirmation.
         </div>
-        <!-- search + calendar row -->
-        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <input id="bmSearch"
-            style="flex:1;min-width:160px;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;margin:0;outline:none;background:#fff;"
-            placeholder="Search BM by text..." />
-          <input id="bmDate" type="date"
-            style="width:150px;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;outline:none;background:#fff;" />
-        </div>
+        <input id="bmSearch"
+          style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;margin:8px 0 4px;outline:none;background:#fff;"
+          placeholder="Search BM by text..." />
+        <input id="bmDate" type="date"
+          style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;margin:0 0 6px;outline:none;background:#fff;" />
         <div id="bmSelectList"></div>
         <div class="bmCard" id="bmViewer" style="display:none;">
           <div class="bmTop">
@@ -865,21 +1028,58 @@
               <div class="bmSub" id="bmMeta"></div>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
-              <button class="btn btnBlue" id="btnLiveBM">Live 24h: off</button>
+              <button class="btn btnBlue" id="btnLiveBM">Live 12h: off</button>
               <button class="btn btnBlue" id="btnUnlockBM" style="display:none;">Unlock</button>
             </div>
           </div>
           <textarea class="bmText" id="bmTextArea" readonly></textarea>
           <div class="bmActions">
             <button class="btn btnBlue" id="btnCopyPrompt">Copy prompt</button>
-            <button class="btn btnBlue" id="btnAutoGen">Auto generate</button>
+            <button class="btn btnBlue" id="btnAutoGen">Generate video</button>
             <button class="btn btnRed" id="btnDeletePrompt">Delete</button>
+          </div>
+        </div>
+        <div class="bmCard" id="bmDreamCard">
+          <div class="bmTop">
+            <div>
+              <div class="title">🌙 Dream Mode / screensaver</div>
+              <div class="bmSub">
+                Choose after how much idle time AURA-X Ω should enter Dream Mode with your BM snapshots.
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+              <button class="btn btnBlue" id="btnTestDream">Test now</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:140px;">
+              <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Start after</label>
+              <select id="dreamDelaySelect"
+                style="width:100%;border-radius:12px;border:1px solid rgba(15,23,42,.18);padding:8px 10px;font-size:13px;background:#fff;">
+                <option value="30000">30 seconds</option>
+                <option value="60000">1 minute</option>
+                <option value="120000">2 minutes</option>
+                <option value="300000">5 minutes</option>
+                <option value="600000">10 minutes</option>
+                <option value="1800000">30 minutes</option>
+                <option value="3600000">1 hour</option>
+                <option value="7200000">2 hours</option>
+                <option value="14400000">4 hours</option>
+                <option value="28800000">8 hours</option>
+              </select>
+            </div>
+            <div style="flex:0 0 140px;">
+              <label style="font-size:12px;opacity:.75;display:block;margin-bottom:4px;">Status</label>
+              <button class="btn btnGreen" id="btnToggleDream">Enable</button>
+            </div>
+          </div>
+          <div class="bmSub" id="dreamStatusText" style="margin-top:8px;">
+            Screensaver is OFF.
           </div>
         </div>
       </div>
     </div>
   </div>
-
   <!-- History -->
   <div class="modalOverlay" id="modalHistory">
     <div class="modal">
@@ -897,7 +1097,6 @@
       </div>
     </div>
   </div>
-
   <!-- Identity -->
   <div class="modalOverlay" id="modalIdentity">
     <div class="modal">
@@ -963,17 +1162,18 @@
       </div>
     </div>
   </div>
-
   <script>
     window.addEventListener("DOMContentLoaded", () => {
-      const KEY_CFG   = "aurax_cfg_v12";
+      const KEY_CFG   = "aurax_cfg_v14";
       const KEY_INT   = "aurax_intel_v11";
       const KEY_BM    = "aurax_bm_v11";
       const KEY_HIST  = "aurax_hist_v11";
       const KEY_USER  = "aurax_user_v11";
       const KEY_LOGIC = "aurax_logic_v12";
       const OFFLINE_MODEL_ID = "Llama-3-8B-Instruct-q4f32_1-MLC";
-
+      const ETHIC_BASE =
+        "Universal ethic: avoid actions that grow negative emotions in you or others. " +
+        "Move gently toward choices that increase shared positive feeling for everyone.";
       const els = {
         console: document.getElementById("console"),
         btnOptions: document.getElementById("btnOptions"),
@@ -996,6 +1196,9 @@
         cCont: document.getElementById("cCont"),
         userInput: document.getElementById("userInput"),
         sendBtn: document.getElementById("sendBtn"),
+        visionInput: document.getElementById("visionInput"),
+        imagePreviewArea: document.getElementById("imagePreviewArea"),
+        imgPrev: document.getElementById("imgPrev"),
         faithBubble: document.getElementById("faithBubble"),
         faithBubbleTitle: document.getElementById("faithBubbleTitle"),
         faithBubbleMeta: document.getElementById("faithBubbleMeta"),
@@ -1007,16 +1210,11 @@
         faithArticleTitle: document.getElementById("faithArticleTitle"),
         faithArticleText: document.getElementById("faithArticleText"),
         btnCopyFaithArticle: document.getElementById("btnCopyFaithArticle"),
-        btnAddFaithToBM: document.getElementById("btnAddFaithToBM"),
+        btnExportFaithArticle: document.getElementById("btnExportFaithArticle"),
         btnSkipFaithBM: document.getElementById("btnSkipFaithBM"),
         modalIntel: document.getElementById("modalIntel"),
         intelSearch: document.getElementById("intelSearch"),
         intelList: document.getElementById("intelList"),
-        intelEditor: document.getElementById("intelEditor"),
-        intelEditQ: document.getElementById("intelEditQ"),
-        intelEditA: document.getElementById("intelEditA"),
-        btnIntelSave: document.getElementById("btnIntelSave"),
-        btnIntelCancel: document.getElementById("btnIntelCancel"),
         modalSeed: document.getElementById("modalSeed"),
         seedBox: document.getElementById("seedBox"),
         seedHint: document.getElementById("seedHint"),
@@ -1069,47 +1267,135 @@
         uEmotionalStyle: document.getElementById("uEmotionalStyle"),
         uKeyPeople: document.getElementById("uKeyPeople"),
         uLegacyRules: document.getElementById("uLegacyRules"),
-        /* reaction buttons */
-        btnCopyLast: document.getElementById("btnCopyLast"),
         btnLikeLast: document.getElementById("btnLikeLast"),
         btnDislikeLast: document.getElementById("btnDislikeLast"),
         btnSpeakLast: document.getElementById("btnSpeakLast"),
         btnShareLast: document.getElementById("btnShareLast"),
-        toast: document.getElementById("toast")
+        toastBubble: document.getElementById("toastBubble"),
+        dreamOverlay: document.getElementById("dreamOverlay"),
+        dreamMetaText: document.getElementById("dreamMetaText"),
+        dreamDelaySelect: document.getElementById("dreamDelaySelect"),
+        btnToggleDream: document.getElementById("btnToggleDream"),
+        btnTestDream: document.getElementById("btnTestDream"),
+        dreamStatusText: document.getElementById("dreamStatusText"),
+        ethicBox: document.getElementById("ethicBox"),
+        ethicMain: document.getElementById("ethicMain"),
+        ethicMeta: document.getElementById("ethicMeta"),
+        faithCfgBtn: document.getElementById("faithCfgBtn"),
+        modalFaithCfg: document.getElementById("modalFaithCfg"),
+        faithCfgFaithTitle: document.getElementById("faithCfgFaithTitle"),
+        faithCfgFaithName: document.getElementById("faithCfgFaithName"),
+        faithCfgEnable: document.getElementById("faithCfgEnable"),
+        faithCfgLang: document.getElementById("faithCfgLang"),
+        faithCfgSave: document.getElementById("faithCfgSave")
       };
-
       const FAITH_OPTIONS = [
-        { id: "none",        label: "None" },
-        { id: "islam",       label: "Islam" },
-        { id: "christianity",label: "Christianity" },
-        { id: "hinduism",    label: "Hinduism" },
-        { id: "buddhism",    label: "Buddhism" },
-        { id: "sikhism",     label: "Sikhism" },
-        { id: "judaism",     label: "Judaism" },
-        { id: "atheism",     label: "Atheism / Humanism" },
-        { id: "mixed",       label: "Other / Mixed" },
-        { id: "indigenous",  label: "Indigenous / Traditional" },
-        { id: "eastern",     label: "Eastern / Chinese" }
+        { id:"none",         label:"None" },
+        { id:"islam",        label:"Islam" },
+        { id:"christianity", label:"Christianity" },
+        { id:"hinduism",     label:"Hinduism" },
+        { id:"buddhism",     label:"Buddhism" },
+        { id:"sikhism",      label:"Sikhism" },
+        { id:"judaism",      label:"Judaism" },
+        { id:"atheism",      label:"Atheism / Humanism" },
+        { id:"mixed",        label:"Other / Mixed" },
+        { id:"indigenous",   label:"Indigenous / Traditional" },
+        { id:"eastern",      label:"Eastern / Chinese" }
       ];
-
-      const FAITH_LIBRARY = {
-        islam: [{
-          id: "islam_generic",
-          title: "Meaning of hardship and patience",
-          short: "Trust, sabr and good opinion of Allah during hard stories.",
-          content:
-            "In Islamic reflection, hardship is often seen as a temporary test that polishes the heart. " +
-            "Believers are invited toward sabr (patience), shukr (gratitude where possible), and husn-uz-zann " +
-            "(a good opinion of Allah). You can ask: what quality is being trained in me here, and which door " +
-            "of mercy may open later from this chapter of my life?"
-        }]
+      /* Short, ethics-style religious lines + translations */
+      const FAITH_LITERATURE = {
+        islam: {
+          base: {
+            original: "ٱلْمُسْلِمُ مَنْ سَلِمَ ٱلْمُسْلِمُونَ مِن لِسَانِهِ وَيَدِهِ",
+            translations: {
+              urdu:   "سچا مسلمان وہ ہے جس کی زبان اور ہاتھ سے دوسرے محفوظ رہیں۔",
+              english:"A true Muslim is the one from whose tongue and hand other people remain safe."
+            }
+          }
+        },
+        christianity: {
+          base: {
+            original: "“Love your neighbour as yourself.”",
+            translations: {
+              urdu:   "اپنے پڑوسی سے ویسے ہی محبت کرو جیسے تم اپنے آپ سے کرتے ہو۔",
+              english:"Love your neighbour as you love yourself."
+            }
+          }
+        },
+        hinduism: {
+          base: {
+            original: "अहिंसा परमो धर्मः",
+            translations: {
+              urdu:   "اہنسا یعنی کسی جاندار کو تکلیف نہ دینا، سب سے بڑا اصول ہے۔",
+              english:"Ahimsa – not harming any living being – is a highest principle."
+            }
+          }
+        },
+        buddhism: {
+          base: {
+            original: "Hatred is never ended by hatred, but by compassion and understanding.",
+            translations: {
+              urdu:   "نفرت کبھی نفرت سے ختم نہیں ہوتی، بلکہ صرف رحم اور سمجھ سے ختم ہوتی ہے۔",
+              english:"Hatred is not ended by hatred, but by compassion and understanding."
+            }
+          }
+        },
+        sikhism: {
+          base: {
+            original: "ਸਰਬੱਤ ਦਾ ਭਲਾ – seek the welfare of all.",
+            translations: {
+              urdu:   "سربت دا بھلا: سب کی بہتری اور بھلائی کا سوچو۔",
+              english:"Sarbat da bhala: seek the well-being of everyone."
+            }
+          }
+        },
+        judaism: {
+          base: {
+            original: "What is hateful to you, do not do to others.",
+            translations: {
+              urdu:   "جو بات تمہیں اپنے لیے بری لگے، وہ دوسروں کے ساتھ مت کرو۔",
+              english:"What is hateful to you, do not do to others."
+            }
+          }
+        },
+        atheism: {
+          base: {
+            original: "Do no unnecessary harm; leave people freer and kinder than you found them.",
+            translations: {
+              urdu:   "بلاوجہ کسی کو نقصان مت پہنچاؤ، اور لوگوں کو پہلے سے زیادہ آزاد اور مہربان چھوڑو۔",
+              english:"Cause no needless harm and try to leave people freer and kinder than you found them."
+            }
+          }
+        }
       };
-
+      const ETHIC_LIBRARY = {
+        general: {
+          general: ETHIC_BASE,
+          hardship: "Even in difficult stories, keep one ethic: do not add more hurt to hearts. Move slowly toward responses that reduce suffering and open space for calm.",
+          relationships: "When the topic is about relationships, speak in a way that keeps dignity on both sides. Protect trust, avoid humiliation, and move toward repair when possible.",
+          health: "For health and illness topics, let ethics mean gentleness: be kind to your own limits and respectful to others’ pain while choosing steps that protect life.",
+          work: "For work, money and projects, keep ethics above short-term gain. Prefer choices that are fair, transparent and do not crush anyone’s future.",
+          gratitude: "When the story carries blessings, let ethics mean gratitude in action: share good, avoid arrogance, and remember how quickly conditions can change.",
+          faith: "When faith enters the story, hold your views with sincerity and humility. Avoid mocking, invite reflection, and keep room for difference without hatred."
+        },
+        islam: {
+          general: "From an Islamic lens: the best ethic is to avoid zulm (harm, injustice) in any form and to choose ihsan (excellence) where you can.",
+          hardship: "From an Islamic lens: tests can raise a person in rank. Do not let pain push you into zulm. Choose sabr, du'a and gentle speech even when the heart is heavy.",
+          relationships: "From an Islamic lens: ties of kinship and trust are amanah. Guard people’s honour, control the tongue, and seek sulh (reconciliation) where possible.",
+          health: "From an Islamic lens: your body is an amanah. Seek treatment, avoid despair, and do not choose paths that casually risk your life or others’.",
+          work: "From an Islamic lens: rizq is from Allah, but justice is your duty. Avoid cheating, riba and exploitation; aim for halal income with clean conscience.",
+          gratitude: "From an Islamic lens: when blessings appear, say Alhamdulillah with the tongue and show shukr by sharing and avoiding arrogance.",
+          faith: "From an Islamic lens: discuss faith with adab. Avoid ridicule, protect sacred things from mockery, and invite towards truth with wisdom and beautiful reminder."
+        }
+      };
+      const defaultDeviceLang = (navigator.language || "").toLowerCase().startsWith("ur") ? "urdu" : "english";
       let state = {
         voiceOn: false,
         learningOn: true,
         faithSelection: [],
+        faithLiveOptions: {},   // { islam: {enabled:true, lang:"urdu"} , ... }
         intelligence: [],
+        seedPairs: [],
         bmPrompts: [],
         history: [],
         userIdentity: null,
@@ -1120,6 +1406,7 @@
         lastAnswerSource: null,
         lastUserQ: null,
         lastAuraA: null,
+        correcting: false,
         metrics: { TM:0, BM:0, C:0.85, E0:0 },
         parsedSeed: [],
         editingIntelId: null,
@@ -1132,49 +1419,39 @@
         abuseCount: 0,
         cooldownUntil: 0,
         mode: "adult",
-        logicFaithSoftener: true
+        logicFaithSoftener: true,
+        toastTimer: null,
+        selectedBMId: null,
+        dreamEnabled: false,
+        dreamDelayMs: 600000,
+        dreamTimerId: null,
+        lastActivityTs: Date.now(),
+        ethic: { topic:"general", lens:"none", lastUpdate:0, messageCount:0 },
+        currentFaith: "none",
+        faithFlightPending: false,
+        faithFlightDone: false,
+        currentFaithForCfg: null
       };
-
       function safeLoadJSON(key, fallback){
         try{
           const raw = localStorage.getItem(key);
           return raw ? JSON.parse(raw) : fallback;
         }catch{ return fallback; }
       }
-      function logLine(text){
+      function logLine(roleOrText, maybeText){
+        let role = "";
+        let text;
+        if (typeof maybeText === "undefined"){ text = roleOrText; }
+        else { role = roleOrText || ""; text = maybeText; }
         const div = document.createElement("div");
-        div.className = "line";
+        div.className = "line" + (role ? " " + role : "");
         div.textContent = text;
         els.console.appendChild(div);
         els.console.scrollTop = els.console.scrollHeight;
-      }
-      /* conversation lines with colored AURA / You */
-      function appendChat(role, text){
-        const line = document.createElement("div");
-        line.className = "line";
-        const tag = document.createElement("span");
-        const msg = document.createElement("span");
-        if(role === "user"){
-          tag.className = "youTag";
-          tag.textContent = "You: ";
-        }else{
-          tag.className = "auraTag";
-          tag.textContent = "AURA: ";
+        if(role === "user" || role === "aura"){
+          addHistory(role, text);
         }
-        msg.textContent = text;
-        line.appendChild(tag);
-        line.appendChild(msg);
-        els.console.appendChild(line);
-        els.console.scrollTop = els.console.scrollHeight;
       }
-
-      function showToast(msg){
-        if(!els.toast) return;
-        els.toast.textContent = msg;
-        els.toast.classList.add("show");
-        setTimeout(()=>els.toast.classList.remove("show"), 1400);
-      }
-
       function scoreTM(t){
         const len = Math.min((t||"").length,600);
         return Number(Math.tanh(len/200).toFixed(2));
@@ -1182,6 +1459,27 @@
       function recomputeBMMetric(){
         const count = state.bmPrompts.length || 0;
         state.metrics.BM = Number(Math.tanh(count/10).toFixed(2));
+      }
+      function applyEmotionalTheme(){
+        const e0 = state.metrics.E0;
+        const root = document.documentElement;
+        let baseColor = "#0ea5e9";
+        let bgOverlay = "transparent";
+        if(e0 > 0.3){
+          const intensity = Math.min((e0 - 0.3) * 2, 1);
+          baseColor = "#fbbf24";
+          bgOverlay = `rgba(251,191,36,${0.08 + 0.12*intensity})`;
+        } else if(e0 < -0.3){
+          const intensity = Math.min((Math.abs(e0) - 0.3) * 2, 1);
+          baseColor = "#64748b";
+          bgOverlay = `rgba(15,23,42,${0.25 + 0.25*intensity})`;
+        }
+        root.style.setProperty('--accent-color', baseColor);
+        document.body.style.backgroundImage =
+          `linear-gradient(${bgOverlay}, ${bgOverlay}),
+           radial-gradient(circle at 20% 0%, #1e293b 0, transparent 45%),
+           radial-gradient(circle at 80% 0, ${baseColor} 0, transparent 40%),
+           linear-gradient(145deg,#020617 0,#020617 40%,#020617 100%)`;
       }
       function recomputeE0(intelBoost, llmBoost){
         const TM = state.metrics.TM;
@@ -1194,6 +1492,7 @@
         const lambdaTrc   = 0.05;
         const raw = R + I_tm + intelBoost + llmBoost - D + lambdaFaith + lambdaSys + lambdaTrc;
         state.metrics.E0 = Number(Math.tanh(raw).toFixed(3));
+        applyEmotionalTheme();
       }
       function updateCapsule(){
         els.cTM.textContent = state.metrics.TM.toFixed(2);
@@ -1201,14 +1500,87 @@
         els.cCont.textContent = state.metrics.C.toFixed(3);
         els.cE0.textContent = state.metrics.E0.toFixed(3);
       }
-
+      function showToast(msg){
+        if(!els.toastBubble) return;
+        els.toastBubble.textContent = msg;
+        els.toastBubble.classList.add("show");
+        if(state.toastTimer) clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(()=>{
+          els.toastBubble.classList.remove("show");
+        },1600);
+      }
+      /* Dream mode */
+      function updateDreamUI(){
+        if(!els.dreamDelaySelect || !els.btnToggleDream || !els.dreamStatusText) return;
+        if(state.dreamEnabled){
+          els.btnToggleDream.textContent = "Disable";
+          els.btnToggleDream.className = "btn btnRed";
+        }else{
+          els.btnToggleDream.textContent = "Enable";
+          els.btnToggleDream.className = "btn btnGreen";
+        }
+        const current = state.dreamDelayMs;
+        let bestVal = els.dreamDelaySelect.options.length ? els.dreamDelaySelect.options[0].value : String(current);
+        let bestDiff = Infinity;
+        Array.from(els.dreamDelaySelect.options).forEach(opt=>{
+          const v = parseInt(opt.value,10);
+          const diff = Math.abs(v-current);
+          if(diff<bestDiff){bestDiff=diff;bestVal=opt.value;}
+        });
+        els.dreamDelaySelect.value = bestVal;
+        const ms = state.dreamDelayMs;
+        let label;
+        if(ms < 60000){
+          label = Math.round(ms/1000) + " seconds";
+        }else{
+          const mins = ms/60000;
+          if(mins >= 60){
+            const hrs = mins/60;
+            label = hrs.toFixed(1).replace(/\.0$/,"") + " hours";
+          }else{
+            label = mins + " minutes";
+          }
+        }
+        els.dreamStatusText.textContent = state.dreamEnabled
+          ? "Screensaver is ON · starts after " + label + " of no activity."
+          : "Screensaver is OFF.";
+      }
+      function showDreamOverlay(){
+        if(!els.dreamOverlay) return;
+        const bmCount = state.bmPrompts.length || 0;
+        if(els.dreamMetaText){
+          els.dreamMetaText.textContent = bmCount
+            ? "Dreaming across " + bmCount + " BM snapshot" + (bmCount>1?"s":"") + "…"
+            : "Dreaming gently with recent TM feelings (no BM snapshots stored yet).";
+        }
+        els.dreamOverlay.classList.add("show");
+      }
+      function hideDreamOverlay(){
+        if(!els.dreamOverlay) return;
+        els.dreamOverlay.classList.remove("show");
+        scheduleDreamTimer();
+      }
+      function scheduleDreamTimer(){
+        state.lastActivityTs = Date.now();
+        if(state.dreamTimerId){ clearTimeout(state.dreamTimerId); state.dreamTimerId = null; }
+        if(!state.dreamEnabled) return;
+        const delay = Math.min(Math.max(state.dreamDelayMs,30000), 28800000);
+        state.dreamDelayMs = delay;
+        state.dreamTimerId = setTimeout(()=>{ showDreamOverlay(); }, delay);
+      }
+      function registerActivity(){
+        if(els.dreamOverlay && els.dreamOverlay.classList.contains("show")) return;
+        scheduleDreamTimer();
+      }
       function saveCfg(){
         const cfg = {
           voiceOn: state.voiceOn,
           learningOn: state.learningOn,
           faithSelection: state.faithSelection,
+          faithLiveOptions: state.faithLiveOptions,
           apiConfig: state.apiConfig,
-          offlineReady: state.offlineReady
+          offlineReady: state.offlineReady,
+          dream: { enabled: state.dreamEnabled, delayMs: state.dreamDelayMs }
         };
         localStorage.setItem(KEY_CFG, JSON.stringify(cfg));
       }
@@ -1220,7 +1592,6 @@
         const data = { list: state.logicPacks || [], activeIndex: state.logicActiveIndex };
         localStorage.setItem(KEY_LOGIC, JSON.stringify(data));
       }
-
       function addHistory(role,text){
         const item = { role, text, ts: Date.now(), locked: false };
         state.history.push(item);
@@ -1240,1169 +1611,1022 @@
         state.history.forEach((h,idx)=>{
           const row = document.createElement("div");
           row.className = "historyLine";
-          const dt = new Date(h.ts).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
-          const label = h.role==="user" ? "you" : (h.role==="aura" ? "aura" : h.role);
-          const txt = document.createElement("div");
-          txt.className = "historyText";
-          txt.textContent = label + "\n" + h.text;
-          const lockBtn = document.createElement("button");
-          lockBtn.type = "button";
-          lockBtn.className = "historyLock";
-          lockBtn.textContent = h.locked ? "🔒" : "🔓";
-          lockBtn.title = h.locked ? "Locked (won't auto-delete)" : "Tap to lock";
-          lockBtn.addEventListener("click", (ev)=>{
-            ev.stopPropagation();
-            toggleHistoryLock(idx);
-          });
-          const timeSpan = document.createElement("div");
-          timeSpan.style.fontSize = "10px";
-          timeSpan.style.opacity = ".7";
-          timeSpan.textContent = dt;
-          txt.appendChild(document.createElement("br"));
-          txt.appendChild(timeSpan);
-          row.appendChild(txt);
-          row.appendChild(lockBtn);
+          const dt = new Date(h.ts).toLocaleString([], {hour:"2-digit",minute:"2-digit", day:"2-digit", month:"short"});
+          const label = h.role==="user" ? "You" : (h.role==="aura" ? "AURA" : h.role);
+          const left = document.createElement("div");
+          left.className = "historyText";
+          left.textContent = `[${dt}] ${label}: ${h.text}`;
+          const btn = document.createElement("button");
+          btn.className = "historyLock";
+          btn.textContent = h.locked ? "🔒" : "🔓";
+          btn.addEventListener("click", ()=>toggleHistoryLock(idx));
+          row.appendChild(left);
+          row.appendChild(btn);
           els.historyBox.appendChild(row);
         });
       }
-
+      /* Faith chips & selection */
       function renderFaithChips(){
         els.faithChips.innerHTML = "";
         FAITH_OPTIONS.forEach(opt=>{
           const chip = document.createElement("button");
-          const active = opt.id==="none"
-            ? state.faithSelection.length===0
-            : state.faithSelection.includes(opt.id);
-          chip.className = "chip"+(active?" active":"");
+          chip.className = "chip" + (state.faithSelection.includes(opt.id) ? " active" : "");
           chip.textContent = opt.label;
-          chip.addEventListener("click",()=>toggleFaith(opt.id));
+          chip.addEventListener("click", ()=>{
+            let newSel = [...state.faithSelection];
+            if(opt.id==="none"){
+              newSel = [];
+            } else {
+              if(newSel.includes(opt.id)){
+                newSel = newSel.filter(x=>x!==opt.id);
+              } else {
+                newSel = newSel.filter(x=>x!=="none");
+                newSel = [opt.id]; // one primary faith for bar
+              }
+            }
+            applyFaithSelection(newSel);
+          });
           els.faithChips.appendChild(chip);
         });
-        updateFaithLabel();
       }
-      function updateFaithLabel(){
-        if(!state.faithSelection.length){
-          els.faithLabel.textContent = "none";
-          els.faithLabel.className = "pillOff";
-        }else if(state.faithSelection.length===1){
-          const opt = FAITH_OPTIONS.find(o=>o.id===state.faithSelection[0]);
-          els.faithLabel.textContent = opt ? opt.label : "1";
-          els.faithLabel.className = "pillOn";
-        }else{
-          els.faithLabel.textContent = "multi";
-          els.faithLabel.className = "pillMid";
-        }
-      }
-      function toggleFaith(id){
-        if(id==="none") state.faithSelection = [];
-        else{
-          const idx = state.faithSelection.indexOf(id);
-          if(idx>=0) state.faithSelection.splice(idx,1);
-          else state.faithSelection.push(id);
-        }
-        saveCfg();
-        renderFaithChips();
-      }
-
-      function showModal(id){ const el=document.getElementById(id); if(el) el.classList.add("show"); }
-      function hideModal(id){ const el=document.getElementById(id); if(el) el.classList.remove("show"); }
-      document.querySelectorAll(".closeX").forEach(btn=>{
-        const target=btn.getAttribute("data-close");
-        if(target) btn.addEventListener("click",()=>hideModal(target));
-      });
-
-      function renderBMList(){
-        els.bmSelectList.innerHTML = "";
-        if(!state.bmPrompts.length){
-          els.bmSelectList.innerHTML =
-            '<div style="margin-top:8px;font-size:12px;opacity:.6;">No BM prompts yet.</div>';
-          els.bmViewer.style.display = "none";
+      function showFaithCfgButtonForFaith(faithId){
+        if(!els.faithCfgBtn) return;
+        if(!faithId || faithId==="none"){
+          els.faithCfgBtn.classList.remove("show");
           return;
         }
-        const q = els.bmSearch ? (els.bmSearch.value || "").trim().toLowerCase() : "";
-        const dateStr = els.bmDate ? (els.bmDate.value || "") : "";
-        let list = state.bmPrompts.slice();
-
-        // text search
-        if(q){
-          list = list.filter(bm=>{
-            const hay = ((bm.title||"") + " " + (bm.summary||"") + " " + (bm.text||"")).toLowerCase();
-            return hay.includes(q);
-          });
+        els.faithCfgBtn.classList.add("show");
+        state.currentFaithForCfg = faithId;
+      }
+      /* ✅ UPDATED: meta empty => hidden */
+      function setEthicText(main, meta){
+        if(!els.ethicMain || !els.ethicBox) return;
+        els.ethicMain.textContent = main;
+        if(els.ethicMeta){
+          const m = (meta || "").trim();
+          els.ethicMeta.textContent = m;
+          els.ethicMeta.style.display = m ? "block" : "none";
         }
-        // calendar date filter
-        if(dateStr){
-          const parts = dateStr.split("-").map(Number);
-          if(parts.length===3 && !Number.isNaN(parts[0])){
-            const start = new Date(parts[0], parts[1]-1, parts[2]).getTime();
-            const end   = start + 24*60*60*1000;
-            list = list.filter(bm=>{
-              const t = bm.createdAt || bm.ts || 0;
-              return t >= start && t < end;
-            });
-          }
-        }
-
-        if(!list.length){
-          els.bmSelectList.innerHTML =
-            '<div style="margin-top:8px;font-size:12px;opacity:.6;">No BM prompts match this filter.</div>';
-          els.bmViewer.style.display = "none";
+        els.ethicBox.classList.remove("ethicPulse");
+        void els.ethicBox.offsetWidth;
+        els.ethicBox.classList.add("ethicPulse");
+      }
+      /* ✅ UPDATED: only statement + translation (no lens/topic) */
+      function setEthicFromFaith(faithId, topic){
+        const options = state.faithLiveOptions[faithId] || {};
+        if(options.enabled === false){
+          setEthicText(ETHIC_BASE, ""); // meta hidden
           return;
         }
-        const now = Date.now();
-        list.sort((a,b)=>b.ts-a.ts);
-        list.forEach(bm=>{
-          const card = document.createElement("div");
-          card.className = "bmCard";
-          card.style.cursor="pointer";
-          const title = document.createElement("div");
-          title.style.fontWeight="800";
-          title.textContent = bm.title || "(untitled story)";
-          const meta = document.createElement("div");
-          meta.style.fontSize="11px";
-          meta.style.opacity=".7";
-          meta.style.marginTop="2px";
-          const created = bm.createdAt || bm.ts;
-          let txt = new Date(created).toLocaleString() + (bm.locked?" · locked":" · editable");
-          if(bm.repeatCount) txt += " · repeats: "+bm.repeatCount;
-          if(bm.keep) txt += " · keep";
-          if(bm.live && bm.liveUntil){
-            if(bm.liveUntil>now) txt += " · live";
-            else txt += " · live expired";
-          }
-          meta.textContent = txt;
-          card.appendChild(title);
-          card.appendChild(meta);
-          card.addEventListener("click",()=>openBM(bm.id));
-          els.bmSelectList.appendChild(card);
-        });
-      }
-
-      let currentBMId = null;
-      function openBM(id){
-        const bm = state.bmPrompts.find(x=>x.id===id);
-        if(!bm) return;
-        currentBMId=id;
-        els.bmViewer.style.display="block";
-        els.bmTitle.textContent = bm.title || "(untitled story)";
-        const now = Date.now();
-        const created = bm.createdAt || bm.ts;
-        let meta = new Date(created).toLocaleString() + (bm.locked?" · locked":" · editable");
-        if(bm.repeatCount) meta += " · repeats: "+bm.repeatCount;
-        if(bm.keep) meta += " · keep";
-        if(bm.live && bm.liveUntil){
-          if(bm.liveUntil>now)
-            meta += " · live until "+new Date(bm.liveUntil).toLocaleTimeString();
-          else
-            meta += " · live expired";
+        const litPack = FAITH_LITERATURE[faithId];
+        if(!litPack || !litPack.base){
+          setEthicText(ETHIC_BASE, ""); // meta hidden
+          return;
         }
-        els.bmMeta.textContent=meta;
-        els.bmLockIcon.textContent = bm.locked?"🔒":"🔓";
-        els.bmTextArea.value = bm.text || "";
-        els.bmTextArea.readOnly = bm.locked;
-        els.btnUnlockBM.style.display = bm.locked?"inline-flex":"none";
-        els.btnLiveBM.textContent = (bm.live && bm.liveUntil && bm.liveUntil>now)
-          ? "Live 24h: on" : "Live 24h: off";
+        const base = litPack.base;
+        let lang = options.lang || "auto";
+        if(lang === "auto") lang = defaultDeviceLang;
+        const trans = (base.translations?.[lang] || base.translations?.english || "").trim();
+        setEthicText(base.original, trans); // ✅ only two lines
       }
-
-      function ensureBMForLastStory(){
-        if(!state.lastStoryInput) return null;
-        if(state.lastStoryBMId) return state.lastStoryBMId;
-        const id = "bm_"+Date.now();
+      function inferTopicFromText(t){
+        const s = (t||"").toLowerCase();
+        if(/death|cry|sad|hard|loss|grief|pain|tension|stress|problem|musibat|imtihan|broken/.test(s)) return "hardship";
+        if(/thanks|thank you|shukr|shukar|grateful|gratitude|blessing|ne'mat|nimat|favou?r/.test(s)) return "gratitude";
+        if(/mother|father|parents|family|friend|dost|wife|husband|relationship|brother|sister|bhai|behen/.test(s)) return "relationships";
+        if(/health|doctor|hospital|ill|sick|fever|disease|bp|sugar|heart attack|medicine/.test(s)) return "health";
+        if(/job|work|office|career|money|loan|business|project|study|exam|paper|marks|salary|promotion/.test(s)) return "work";
+        if(/allah|god|jesus|quran|hadith|bible|gita|prayer|dua|tafsir|masjid|church|temple/.test(s)) return "faith";
+        return "general";
+      }
+      /* ✅ UPDATED: lens/topic meta removed for generic mode too */
+      function updateEthicBar(latestUserText){
+        if(!latestUserText) return;
+        state.ethic.messageCount++;
+        if(state.ethic.messageCount < 2) return;
+        const topic = inferTopicFromText(latestUserText);
+        const lensId = (state.faithSelection[0] || "none");
         const now = Date.now();
-        const obj = {
-          id,
-          title:"Story @ "+new Date().toLocaleString(),
-          summary: state.lastStoryInput.slice(0,180),
-          text: state.lastStoryInput,
-          locked:true,
-          ts: now,
-          createdAt: now,
-          live:false,
-          liveUntil:null,
-          repeatCount:0,
-          keep:false
+        if(topic === state.ethic.topic && lensId === state.ethic.lens && (now - state.ethic.lastUpdate) < 15000){
+          return;
+        }
+        if(lensId !== "none"){
+          setEthicFromFaith(lensId, topic);
+        } else {
+          const lensKey = ETHIC_LIBRARY[lensId] ? lensId : "general";
+          const lib = ETHIC_LIBRARY[lensKey] || ETHIC_LIBRARY.general;
+          const line = lib[topic] || lib.general || ETHIC_BASE;
+          setEthicText(line, ""); // ✅ no meta
+        }
+        state.ethic.topic = topic;
+        state.ethic.lens = lensId;
+        state.ethic.lastUpdate = now;
+      }
+      function startFaithFlight(){
+        if(!els.faithBubble) return;
+        state.faithFlightPending = false;
+        state.faithFlightDone = true;
+        els.faithBubble.classList.remove("pulse");
+        els.faithBubble.classList.add("flying");
+        const pill = document.querySelector(".pill");
+        const onEnd = () => {
+          els.faithBubble.classList.remove("show","flying");
+          els.faithBubble.removeEventListener("animationend", onEnd);
+          if(pill) pill.classList.add("faithGlow");
         };
-        state.bmPrompts.push(obj);
-        state.lastStoryBMId = id;
-        saveBM();
-        renderBMList();
-        recomputeBMMetric();
-        updateCapsule();
-        return id;
+        els.faithBubble.addEventListener("animationend", onEnd);
       }
-
-      function getActiveLiveBM(){
-        const now=Date.now();
-        const active=state.bmPrompts.filter(bm=>bm.live && bm.liveUntil && bm.liveUntil>now);
-        if(!active.length) return null;
-        active.sort((a,b)=>b.ts-a.ts);
-        return active[0];
-      }
-
-      function maybeUpdateLiveBM(userText,answer){
-        const bm=getActiveLiveBM();
-        if(!bm) return;
-        const trimmed=(userText||"").trim();
-        if(!trimmed || trimmed.length<40) return;
-        const stamp=new Date().toLocaleString();
-
-        bm.repeatCount = (bm.repeatCount || 0) + 1;
-        if (bm.repeatCount >= 1) bm.keep = true;
-        if (bm.repeatCount >= 3) bm.locked = true;
-
-        bm.text = (bm.text||"")+
-          "\n\n[Update @ "+stamp+"]\nYou: "+userText+"\nAURA: "+answer;
-        bm.summary = bm.text.slice(0,180);
-        bm.ts=Date.now();
-        saveBM();
-        renderBMList();
-        if(currentBMId===bm.id) openBM(bm.id);
-      }
-
-      function renderIntelList(){
-        els.intelList.innerHTML="";
-        const q=(els.intelSearch.value||"").toLowerCase();
-        const items=state.intelligence.filter(it=>{
-          if(!q) return true;
-          return it.q.toLowerCase().includes(q) || it.a.toLowerCase().includes(q);
-        });
-        if(!items.length){
-          els.intelList.innerHTML=
-            '<div style="margin-top:8px;font-size:12px;opacity:.6;">No intelligence saved yet.</div>';
+      function onFaithChanged(){
+        const newFaith = state.faithSelection[0] || "none";
+        state.currentFaith = newFaith;
+        els.faithLabel.textContent = state.faithSelection.length ? state.faithSelection.join(", ") : "none";
+        const pill = document.querySelector(".pill");
+        if(newFaith === "none"){
+          state.currentFaithForCfg = null;
+          state.faithFlightPending = false;
+          state.faithFlightDone = false;
+          if(els.faithCfgBtn) els.faithCfgBtn.classList.remove("show");
+          if(els.faithBubble){
+            els.faithBubble.classList.remove("show","pulse","flying");
+          }
+          if(pill) pill.classList.remove("faithGlow");
+          setEthicText(ETHIC_BASE,""); // ✅ no meta
+          state.ethic.lens = "none";
+          saveCfg();
           return;
         }
-        items.forEach(it=>{
-          const card=document.createElement("div");
-          card.className="bmCard";
-          const qEl=document.createElement("div");
-          qEl.style.fontWeight="800";
-          qEl.textContent="Q: "+it.q;
-          const aEl=document.createElement("div");
-          aEl.style.marginTop="4px";
-          aEl.style.fontSize="13px";
-          aEl.textContent="A: "+it.a;
-          const meta=document.createElement("div");
-          meta.style.fontSize="11px";
-          meta.style.opacity=".7";
-          meta.style.marginTop="4px";
-          meta.textContent=it.meta||"";
-          const row=document.createElement("div");
-          row.style.display="flex";
-          row.style.gap="8px";
-          row.style.marginTop="8px";
-          const btnE=document.createElement("button");
-          btnE.className="btn btnBlue";
-          btnE.textContent="Edit";
-          btnE.addEventListener("click",()=>openIntelEditor(it));
-          const btnD=document.createElement("button");
-          btnD.className="btn btnRed";
-          btnD.textContent="Delete";
-          btnD.addEventListener("click",()=>deleteIntel(it.id));
-          row.appendChild(btnE);row.appendChild(btnD);
-          card.appendChild(qEl);card.appendChild(aEl);card.appendChild(meta);card.appendChild(row);
+        // New faith selected
+        showFaithCfgButtonForFaith(newFaith);
+        // Bubble text
+        if(els.faithBubble){
+          const label = FAITH_OPTIONS.find(f=>f.id===newFaith)?.label || newFaith;
+          els.faithBubbleTitle.textContent = "Faith lens: " + label;
+          els.faithBubbleMeta.textContent = "You'll get updates according to your selected faith above. 🐦";
+          els.faithBubble.classList.remove("flying");
+          els.faithBubble.classList.add("show","pulse");
+        }
+        state.faithFlightPending = true;
+        state.faithFlightDone = false;
+        saveCfg();
+      }
+      function applyFaithSelection(newSel){
+        state.faithSelection = newSel || [];
+        renderFaithChips();
+        onFaithChanged();
+        saveCfg();
+      }
+      /* Faith bubble -> article modal (optional) */
+      function maybeShowFaithBubble(){
+        if(!state.faithSelection.length) return;
+        const pick = state.faithSelection[0];
+        const list = FAITH_LITERATURE[pick];
+        if(!list) return;
+        const art = list.base;
+        state.currentFaithArticle = { id: pick+"_base", title: "Core ethic line", short: "Short reflection from selected literature.", content: art.translations[defaultDeviceLang] || art.translations.english };
+        els.faithBubbleTitle.textContent = "Faith reflection";
+        els.faithBubbleMeta.textContent = "Tap to open a short reflection.";
+        els.faithBubble.classList.add("show");
+      }
+      function openModal(el){ el.classList.add("show"); }
+      function closeModalById(id){
+        const el = document.getElementById(id);
+        if(el) el.classList.remove("show");
+      }
+      document.body.addEventListener("click",(e)=>{
+        const target = e.target;
+        if(target.dataset && target.dataset.close){
+          closeModalById(target.dataset.close);
+        }
+        if(target.classList && target.classList.contains("modalOverlay") && !target.classList.contains("noClose")){
+          target.classList.remove("show");
+        }
+      });
+      if(els.faithBubble){
+        els.faithBubble.addEventListener("click",()=>{
+          if(!state.currentFaithArticle) return;
+          const art = state.currentFaithArticle;
+          const meta = `Lens: ${state.faithSelection.join(", ") || "none"} · id=${art.id||"base"}`;
+          els.faithArticleMeta.textContent = meta;
+          els.faithArticleTitle.textContent = art.title || "Faith reflection";
+          els.faithArticleText.value = art.content || "";
+          openModal(els.modalFaithArticle);
+        });
+      }
+      if(els.faithBubbleClose){
+        els.faithBubbleClose.addEventListener("click",(ev)=>{
+          ev.stopPropagation();
+          els.faithBubble.classList.remove("show","pulse","flying");
+        });
+      }
+      els.btnCopyFaithArticle.addEventListener("click",()=>{
+        navigator.clipboard?.writeText(els.faithArticleText.value||"");
+        showToast("Faith reflection copied");
+      });
+      els.btnExportFaithArticle.addEventListener("click",()=>{
+        const title = (els.faithArticleTitle.textContent || "faith_reflection").replace(/[^\w\-]+/g,"_");
+        const blob = new Blob([els.faithArticleText.value || ""], {type:"text/plain;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = title + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Exported as text file");
+      });
+      els.btnSkipFaithBM.addEventListener("click",()=>{
+        closeModalById("modalFaithArticle");
+      });
+      /* Faith live bar config modal */
+      if(els.faithCfgBtn){
+        els.faithCfgBtn.addEventListener("click",()=>{
+          const fid = state.currentFaithForCfg;
+          if(!fid || fid==="none") return;
+          const opt = state.faithLiveOptions[fid] || { enabled:true, lang:"auto" };
+          const label = FAITH_OPTIONS.find(f=>f.id===fid)?.label || fid;
+          els.faithCfgFaithName.textContent = label;
+          els.faithCfgFaithTitle.textContent = "Configure live bar for "+label;
+          els.faithCfgEnable.checked = opt.enabled !== false;
+          els.faithCfgLang.value = opt.lang || "auto";
+          openModal(els.modalFaithCfg);
+        });
+      }
+      if(els.faithCfgSave){
+        els.faithCfgSave.addEventListener("click",()=>{
+          const fid = state.currentFaithForCfg;
+          if(!fid || fid==="none") return;
+          const enabled = els.faithCfgEnable.checked;
+          const lang = els.faithCfgLang.value || "auto";
+          state.faithLiveOptions[fid] = { enabled, lang };
+          saveCfg();
+          if(els.faithCfgBtn) els.faithCfgBtn.classList.remove("show");
+          closeModalById("modalFaithCfg");
+          showToast("Faith live bar updated");
+          if(enabled){
+            setEthicFromFaith(fid, state.ethic.topic || "general");
+          } else {
+            setEthicText(ETHIC_BASE,""); // ✅ no meta
+          }
+        });
+      }
+      /* Intelligence rendering */
+      function renderIntelligence(filter=""){
+        els.intelList.innerHTML = "";
+        const q = (filter||"").toLowerCase();
+        const list = state.intelligence.filter(item=>{
+          if(!q) return true;
+          return (item.q||"").toLowerCase().includes(q) || (item.a||"").toLowerCase().includes(q);
+        });
+        if(!list.length){
+          const p = document.createElement("div");
+          p.style.fontSize = "12px";
+          p.style.opacity = "0.65";
+          p.textContent = "No intelligence stored yet.";
+          els.intelList.appendChild(p);
+          return;
+        }
+        list.forEach(item=>{
+          const card = document.createElement("div");
+          card.className = "intelCard";
+          const top = document.createElement("div");
+          top.className = "intelTop";
+          const qDiv = document.createElement("div");
+          qDiv.className = "intelQ";
+          qDiv.textContent = "Q: " + item.q;
+          const meta = document.createElement("div");
+          meta.className = "intelMeta";
+          const dt = new Date(item.ts||Date.now()).toLocaleString();
+          meta.textContent = `id=${item.id} · ${dt}`;
+          top.appendChild(qDiv);
+          top.appendChild(meta);
+          const aDiv = document.createElement("div");
+          aDiv.className = "intelA";
+          aDiv.textContent = "A: " + item.a;
+          const btns = document.createElement("div");
+          btns.className = "intelButtons";
+          const bEdit = document.createElement("button");
+          bEdit.className = "btn btnBlue";
+          bEdit.textContent = "Edit";
+          const bDelete = document.createElement("button");
+          bDelete.className = "btn btnRed";
+          bDelete.textContent = "Delete";
+          const bCopy = document.createElement("button");
+          bCopy.className = "btn btnBlue";
+          bCopy.textContent = "Copy";
+          bCopy.addEventListener("click",()=>{
+            navigator.clipboard?.writeText(`Q: ${item.q}\nA: ${item.a}`);
+            showToast("Pair copied");
+          });
+          bDelete.addEventListener("click",()=>{
+            if(!confirm("Delete this Q→A pair?")) return;
+            state.intelligence = state.intelligence.filter(x=>x.id!==item.id);
+            saveIntelligence();
+            renderIntelligence(els.intelSearch.value);
+            showToast("Deleted");
+          });
+          bEdit.addEventListener("click",()=>{
+            state.editingIntelId = (state.editingIntelId === item.id) ? null : item.id;
+            renderIntelligence(els.intelSearch.value);
+          });
+          btns.appendChild(bEdit);
+          btns.appendChild(bCopy);
+          btns.appendChild(bDelete);
+          card.appendChild(top);
+          card.appendChild(aDiv);
+          card.appendChild(btns);
+          if(state.editingIntelId === item.id){
+            const editBlock = document.createElement("div");
+            editBlock.className = "intelEditBlock";
+            const qi = document.createElement("input");
+            qi.className = "intelEditInput";
+            qi.value = item.q;
+            const ai = document.createElement("textarea");
+            ai.className = "intelEditArea";
+            ai.value = item.a;
+            const row = document.createElement("div");
+            row.style.display = "flex";
+            row.style.gap = "8px";
+            row.style.marginTop = "6px";
+            row.style.flexWrap = "wrap";
+            const bSave = document.createElement("button");
+            bSave.className = "btn btnGreen";
+            bSave.textContent = "Save";
+            const bCancel = document.createElement("button");
+            bCancel.className = "btn btnRed";
+            bCancel.textContent = "Cancel";
+            bSave.addEventListener("click",()=>{
+              item.q = qi.value.trim();
+              item.a = ai.value.trim();
+              item.ts = item.ts || Date.now();
+              saveIntelligence();
+              state.editingIntelId = null;
+              renderIntelligence(els.intelSearch.value);
+              showToast("Updated");
+            });
+            bCancel.addEventListener("click",()=>{
+              state.editingIntelId = null;
+              renderIntelligence(els.intelSearch.value);
+            });
+            row.appendChild(bSave);
+            row.appendChild(bCancel);
+            editBlock.appendChild(qi);
+            editBlock.appendChild(ai);
+            editBlock.appendChild(row);
+            card.appendChild(editBlock);
+          }
           els.intelList.appendChild(card);
         });
       }
-
-      function openIntelEditor(it){
-        state.editingIntelId=it.id;
-        els.intelEditQ.value=it.q;
-        els.intelEditA.value=it.a;
-        els.intelEditor.style.display="block";
-      }
-      function closeIntelEditor(){
-        state.editingIntelId=null;
-        els.intelEditQ.value="";els.intelEditA.value="";
-        els.intelEditor.style.display="none";
-      }
-      function deleteIntel(id){
-        if(!confirm("Delete this intelligence pair?")) return;
-        state.intelligence = state.intelligence.filter(x=>x.id!==id);
-        saveIntelligence();renderIntelList();
-      }
-
-      function parseSeedBlock(){
-        const text=els.seedBox.value||"";
-        state.parsedSeed=[];
-        if(!text.trim()){ els.seedHint.textContent="No text to parse."; return; }
-        const regex=/\\item\s*(.*?)\s*\\textbf\{A:\}\s*([\s\S]*?)(?=\\item|$)/g;
+      els.intelSearch.addEventListener("input",()=>renderIntelligence(els.intelSearch.value));
+      /* Seed parsing */
+      function parseSeedBlock(text){
+        const lines = text.split(/\r?\n/);
+        const joined = lines.join("\n");
+        const regex = /\\item\s*(.+?)\s*\\textbf\{A:\}\s*([\s\S]*?)(?=\\item|$)/g;
+        const out = [];
         let m;
-        while((m=regex.exec(text))!==null){
-          const q=m[1].replace(/\s+/g," ").trim();
-          const aRaw=m[2].trim();
-          const metaMatch=aRaw.match(/^\[(.*?)\]\s*(.*)$/s);
-          let meta=""; let a=aRaw;
-          if(metaMatch){ meta=metaMatch[1]; a=metaMatch[2].trim(); }
+        while((m = regex.exec(joined))!==null){
+          const q = m[1].trim();
+          const rawA = m[2].trim();
+          let a = rawA;
+          const bracket = rawA.match(/^\[.*?\]\s*(.*)$/s);
+          if(bracket) a = bracket[1].trim();
           if(q && a){
-            state.parsedSeed.push({
-              id:"intel_"+Date.now()+"_"+Math.random().toString(16).slice(2),
-              q,a,meta
-            });
+            out.push({ id:"seed_"+(Date.now()+"_"+out.length), q, a, ts:Date.now() });
           }
         }
-        if(!state.parsedSeed.length)
-          els.seedHint.textContent="No LaTeX-style items detected.";
-        else
-          els.seedHint.textContent="Parsed "+state.parsedSeed.length+" Q→A pairs. Click 'Save to seed'.";
+        return out;
       }
-      function saveParsedSeed(){
+      els.btnParseSeed.addEventListener("click",()=>{
+        const txt = els.seedBox.value.trim();
+        if(!txt){ els.seedHint.textContent = "Nothing to parse."; return; }
+        const parsed = parseSeedBlock(txt);
+        state.parsedSeed = parsed;
+        els.seedHint.textContent = `Parsed ${parsed.length} Q→A pairs (not saved yet).`;
+      });
+      els.btnSaveSeed.addEventListener("click",()=>{
         if(!state.parsedSeed.length){
-          els.seedHint.textContent="Nothing parsed yet."; return;
+          els.seedHint.textContent = "Nothing parsed yet.";
+          return;
         }
-        state.intelligence = state.intelligence.concat(state.parsedSeed);
-        saveIntelligence();
-        renderIntelList();
-        els.seedHint.textContent="Saved "+state.parsedSeed.length+" pairs into intelligence.";
-        state.parsedSeed=[];
-        els.seedBox.value="";
-      }
-      function discardSeed(){
-        state.parsedSeed=[];els.seedBox.value="";
-        els.seedHint.textContent="Waiting for block…";
-      }
-
-      function findBestIntelMatch(text){
-        const t=text.toLowerCase();
-        let best=null;
-        state.intelligence.forEach(item=>{
-          const q=item.q.toLowerCase();
-          let score=0;
-          if(t===q) score=1;
-          else if(t.includes(q)||q.includes(t)) score=.8;
-          else{
-            const words=t.split(/\s+/);let hits=0;
-            words.forEach(w=>{if(w.length>3 && q.includes(w)) hits++;});
-            score=hits/Math.max(words.length,1);
+        state.seedPairs = state.seedPairs.concat(state.parsedSeed);
+        state.parsedSeed = [];
+        els.seedHint.textContent = "Saved into seed memory.";
+        els.seedBox.value = "";
+        showToast("Seed updated");
+      });
+      els.btnDiscardSeed.addEventListener("click",()=>{
+        els.seedBox.value = "";
+        state.parsedSeed = [];
+        els.seedHint.textContent = "Discarded block.";
+      });
+      /* Logic packs */
+      function applyLogicPack(idx){
+        state.logicActiveIndex = idx;
+        if(idx==null || !state.logicPacks[idx]) return;
+        const pack = state.logicPacks[idx];
+        state.logicFaithSoftener = pack.faithSoftener !== false;
+        if(pack.ui){
+          if(pack.ui.theme === "golden"){
+            document.body.classList.add("theme-golden");
+          } else {
+            document.body.classList.remove("theme-golden");
           }
-          if(score>0.35 && (!best || score>best.score)) best={item,score};
-        });
-        return best;
-      }
-
-      async function callOfflineLLM(text){
-        if(!state.offlineEngine || !window.webllm) return null;
-        try{
-          const messages=[
-            {role:"system",content:"You are AURA-X Ω, an offline emotional continuity assistant. Answer briefly and kindly."},
-            {role:"user",content:text}
-          ];
-          const reply=await state.offlineEngine.chat.completions.create({messages});
-          const msg=reply && reply.choices && reply.choices[0] && reply.choices[0].message && reply.choices[0].message.content;
-          return msg?msg.trim():null;
-        }catch(e){
-          logLine("[offline LLM error] "+e.message);return null;
+          if(pack.ui.accentColor){
+            document.documentElement.style.setProperty("--accent-color", pack.ui.accentColor);
+          }
         }
+        persistLogicState();
       }
-      async function initOfflineEngine(){
-        if(!window.webllm || state.offlineLoading || state.offlineReady) return;
-        state.offlineLoading=true;
-        els.offlineStatus.textContent="loading…";
-        els.offlineBar.style.width="5%";
+      els.btnValidateLogic.addEventListener("click",()=>{
         try{
-          const engine=await window.webllm.CreateMLCEngine(OFFLINE_MODEL_ID,{
-            initProgressCallback:(report)=>{
-              if(!report) return;
-              if(typeof report.progress==="number"){
-                const pct=Math.round(report.progress*100);
-                els.offlineBar.style.width=pct+"%";
-              }
-              if(report.text) els.offlineStatus.textContent=report.text;
+          JSON.parse(els.logicBox.value);
+          els.logicHint.textContent = "Valid JSON.";
+          showToast("Logic JSON valid");
+        }catch(e){
+          els.logicHint.textContent = "Invalid JSON: "+e.message;
+        }
+      });
+      els.btnSaveLogic.addEventListener("click",()=>{
+        try{
+          const obj = JSON.parse(els.logicBox.value);
+          obj.serial = obj.serial || ("L"+(state.logicPacks.length+1));
+          state.logicPacks.push(obj);
+          els.logicSerial.textContent = obj.serial;
+          els.logicHint.textContent = "Saved as "+obj.serial;
+          applyLogicPack(state.logicPacks.length-1);
+          persistLogicState();
+          showToast("Logic pack saved");
+        }catch(e){
+          els.logicHint.textContent = "Cannot save: invalid JSON.";
+        }
+      });
+      els.btnCopyLogic.addEventListener("click",()=>{
+        navigator.clipboard?.writeText(els.logicBox.value||"");
+        showToast("Logic copied");
+      });
+      els.btnDeleteLogic.addEventListener("click",()=>{
+        if(state.logicActiveIndex==null || !state.logicPacks[state.logicActiveIndex]){
+          els.logicHint.textContent = "No active logic pack.";
+          return;
+        }
+        if(!confirm("Delete current logic pack?")) return;
+        state.logicPacks.splice(state.logicActiveIndex,1);
+        state.logicActiveIndex = null;
+        els.logicSerial.textContent = "none";
+        els.logicHint.textContent = "Deleted.";
+        document.body.classList.remove("theme-golden");
+        document.documentElement.style.setProperty("--accent-color", "#0ea5e9");
+        persistLogicState();
+      });
+      /* BM list & viewer */
+      function renderBMList(){
+        els.bmSelectList.innerHTML = "";
+        const q = (els.bmSearch.value||"").toLowerCase();
+        const d = (els.bmDate.value||"");
+        const list = state.bmPrompts.filter(b=>{
+          let ok = true;
+          if(q){
+            ok = (b.title||"").toLowerCase().includes(q) || (b.text||"").toLowerCase().includes(q);
+          }
+          if(ok && d){
+            const dStr = new Date(b.ts||Date.now()).toISOString().slice(0,10);
+            ok = (dStr === d);
+          }
+          return ok;
+        }).sort((a,b)=> (b.ts||0)-(a.ts||0));
+        if(!list.length){
+          const div = document.createElement("div");
+          div.style.fontSize = "12px";
+          div.style.opacity = "0.65";
+          div.textContent = "No BM prompts yet.";
+          els.bmSelectList.appendChild(div);
+          return;
+        }
+        list.forEach(bm=>{
+          const item = document.createElement("div");
+          item.className = "bmItem";
+          const left = document.createElement("div");
+          const title = document.createElement("div");
+          title.className = "bmItemTitle";
+          title.textContent = bm.title||"(untitled)";
+          const meta = document.createElement("div");
+          meta.className = "bmItemMeta";
+          const ds = new Date(bm.ts||Date.now()).toISOString().slice(0,10);
+          meta.textContent = ds + (bm.locked ? " · 🔒" : "");
+          left.appendChild(title);
+          left.appendChild(meta);
+          item.appendChild(left);
+          item.addEventListener("click",()=>selectBM(bm.id));
+          els.bmSelectList.appendChild(item);
+        });
+      }
+      function selectBM(id){
+        const bm = state.bmPrompts.find(x=>x.id===id);
+        state.selectedBMId = id;
+        if(!bm){
+          els.bmViewer.style.display = "none";
+          return;
+        }
+        els.bmViewer.style.display = "block";
+        els.bmTitle.textContent = bm.title||"Prompt";
+        const ds = new Date(bm.ts||Date.now()).toLocaleString();
+        const live = bm.liveUntil && bm.liveUntil > Date.now();
+        els.bmMeta.textContent = ds + (bm.locked ? " · locked" : " · editable") + (live ? " · LIVE 12h" : "");
+        els.bmTextArea.value = bm.text||"";
+        els.bmTextArea.readOnly = true;
+        els.bmLockIcon.textContent = bm.locked ? "🔒" : "🔓";
+        els.btnUnlockBM.style.display = bm.locked ? "inline-flex" : "none";
+        els.btnLiveBM.textContent = live ? "Live 12h: on" : "Live 12h: off";
+      }
+      els.bmSearch.addEventListener("input", renderBMList);
+      els.bmDate.addEventListener("change", ()=>{
+        renderBMList();
+        const d = els.bmDate.value;
+        if(d){
+          const found = state.bmPrompts.find(b=>{
+            const ds = new Date(b.ts||Date.now()).toISOString().slice(0,10);
+            return ds === d;
+          });
+          if(found) selectBM(found.id);
+        }
+      });
+      els.btnLiveBM.addEventListener("click",()=>{
+        if(!state.selectedBMId) return;
+        const bm = state.bmPrompts.find(x=>x.id===state.selectedBMId);
+        if(!bm) return;
+        const now = Date.now();
+        if(bm.liveUntil && bm.liveUntil > now){
+          bm.liveUntil = null;
+        } else {
+          bm.liveUntil = now + 12*60*60*1000;
+        }
+        saveBM();
+        renderBMList();
+        selectBM(bm.id);
+      });
+      els.btnUnlockBM.addEventListener("click",()=>{
+        if(!state.selectedBMId) return;
+        const bm = state.bmPrompts.find(x=>x.id===state.selectedBMId);
+        if(!bm) return;
+        if(!confirm("Unlock this BM prompt for editing?")) return;
+        bm.locked = false;
+        saveBM();
+        renderBMList();
+        selectBM(bm.id);
+      });
+      els.btnCopyPrompt.addEventListener("click",()=>{
+        if(!state.selectedBMId) return;
+        const bm = state.bmPrompts.find(x=>x.id===state.selectedBMId);
+        if(!bm) return;
+        navigator.clipboard?.writeText(bm.text||"");
+        showToast("BM prompt copied");
+      });
+      els.btnAutoGen.addEventListener("click",()=>{
+        showToast("Video generation is a placeholder in this offline prototype.");
+      });
+      els.btnDeletePrompt.addEventListener("click",()=>{
+        if(!state.selectedBMId) return;
+        const bm = state.bmPrompts.find(x=>x.id===state.selectedBMId);
+        if(!bm) return;
+        if(!confirm("Delete this BM prompt?")) return;
+        if(!confirm("Are you sure? This cannot be undone.")) return;
+        state.bmPrompts = state.bmPrompts.filter(x=>x.id!==bm.id);
+        state.selectedBMId = null;
+        saveBM();
+        recomputeBMMetric();
+        recomputeE0(0,0);
+        updateCapsule();
+        renderBMList();
+        els.bmViewer.style.display = "none";
+        showToast("BM prompt deleted");
+      });
+      if(els.btnToggleDream){
+        els.btnToggleDream.addEventListener("click",()=>{
+          state.dreamEnabled = !state.dreamEnabled;
+          if(!state.dreamEnabled){
+            if(state.dreamTimerId){ clearTimeout(state.dreamTimerId); state.dreamTimerId = null; }
+            if(els.dreamOverlay) els.dreamOverlay.classList.remove("show");
+          }
+          updateDreamUI();
+          saveCfg();
+          scheduleDreamTimer();
+        });
+      }
+      if(els.dreamDelaySelect){
+        els.dreamDelaySelect.addEventListener("change",()=>{
+          const v = parseInt(els.dreamDelaySelect.value,10);
+          if(!isNaN(v)){
+            state.dreamDelayMs = v;
+            updateDreamUI();
+            saveCfg();
+            scheduleDreamTimer();
+          }
+        });
+      }
+      if(els.btnTestDream && els.dreamOverlay){
+        els.btnTestDream.addEventListener("click",()=>{ showDreamOverlay(); });
+      }
+      if(els.dreamOverlay){
+        els.dreamOverlay.addEventListener("click",()=>{ hideDreamOverlay(); });
+      }
+      /* Identity */
+      function loadIdentityIntoForm(){
+        const u = state.userIdentity || {};
+        els.uName.value = u.name || "";
+        els.uNick.value = u.nick || "";
+        els.uOrigin.value = u.origin || "";
+        els.uPlace.value = u.place || "";
+        els.uProfession.value = u.profession || "";
+        els.uEmotionalStyle.value = u.emotionalStyle || "";
+        els.uKeyPeople.value = u.keyPeople || "";
+        els.uLegacyRules.value = u.legacyRules || "";
+      }
+      els.btnEditIdentity.addEventListener("click",()=>{
+        [els.uName,els.uNick,els.uOrigin,els.uPlace,els.uProfession,
+         els.uEmotionalStyle,els.uKeyPeople,els.uLegacyRules].forEach(el=>el.removeAttribute("readonly"));
+        showToast("Identity fields unlocked for edit");
+      });
+      els.btnSaveUserIdentity.addEventListener("click",()=>{
+        state.userIdentity = {
+          name: els.uName.value.trim(),
+          nick: els.uNick.value.trim(),
+          origin: els.uOrigin.value.trim(),
+          place: els.uPlace.value.trim(),
+          profession: els.uProfession.value.trim(),
+          emotionalStyle: els.uEmotionalStyle.value.trim(),
+          keyPeople: els.uKeyPeople.value.trim(),
+          legacyRules: els.uLegacyRules.value.trim(),
+          ts: Date.now()
+        };
+        saveUserIdentity();
+        [els.uName,els.uNick,els.uOrigin,els.uPlace,els.uProfession,
+         els.uEmotionalStyle,els.uKeyPeople,els.uLegacyRules].forEach(el=>el.setAttribute("readonly","readonly"));
+        showToast("Identity saved locally");
+      });
+      els.btnDeleteUserIdentity.addEventListener("click",()=>{
+        if(!confirm("Delete stored identity data?")) return;
+        if(!confirm("Are you sure?")) return;
+        state.userIdentity = null;
+        localStorage.removeItem(KEY_USER);
+        [els.uName,els.uNick,els.uOrigin,els.uPlace,els.uProfession,
+         els.uEmotionalStyle,els.uKeyPeople,els.uLegacyRules].forEach(el=>el.value="");
+        showToast("Identity deleted");
+      });
+      /* LLM */
+      els.btnSaveLLM.addEventListener("click",()=>{
+        state.apiConfig = {
+          endpoint: els.apiEndpoint.value.trim(),
+          model: els.apiModel.value.trim(),
+          key: els.apiKey.value.trim()
+        };
+        saveCfg();
+        showToast("LLM config saved");
+      });
+      async function loadOfflineModel(){
+        if(!window.webllm){
+          els.offlineStatus.textContent = "WebLLM not available.";
+          return;
+        }
+        if(state.offlineReady || state.offlineLoading) return;
+        try{
+          state.offlineLoading = true;
+          els.offlineStatus.textContent = "loading…";
+          els.offlineBar.style.width = "25%";
+          const engine = await window.webllm.CreateMLCEngine(OFFLINE_MODEL_ID, {
+            initProgressCallback: (p)=>{
+              const pct = Math.round((p.progress||0)*100);
+              els.offlineBar.style.width = pct+"%";
             }
           });
-          state.offlineEngine=engine;
-          state.offlineReady=true;
-          els.offlineStatus.textContent="ready";
-          els.offlineBar.style.width="100%";
+          state.offlineEngine = engine;
+          state.offlineReady = true;
+          state.offlineLoading = false;
+          els.offlineStatus.textContent = "ready";
+          els.offlineBar.style.width = "100%";
           saveCfg();
+          showToast("Offline model ready");
         }catch(e){
-          console.error(e);
-          els.offlineStatus.textContent="error";
-          els.offlineBar.style.width="0%";
-          state.offlineLoading=false;
-          logLine("[offline LLM] Failed to load model.");
+          state.offlineLoading = false;
+          els.offlineStatus.textContent = "error";
+          showToast("Offline model error");
         }
       }
-      async function callOnlineLLM(text){
-        const cfg=state.apiConfig;
-        if(!cfg || !cfg.endpoint || !cfg.model || !cfg.key) return null;
+      els.btnLoadOffline.addEventListener("click", loadOfflineModel);
+      async function callOfflineLLM(prompt){
+        if(!state.offlineReady || !state.offlineEngine) return null;
         try{
-          const res=await fetch(cfg.endpoint,{
-            method:"POST",
-            headers:{
-              "Content-Type":"application/json",
-              "Authorization":"Bearer "+cfg.key
-            },
-            body:JSON.stringify({
-              model:cfg.model,
-              messages:[
-                {role:"system",content:"You are AURA-X Ω, an emotional continuity assistant. Answer briefly and clearly."},
-                {role:"user",content:text}
-              ]
-            })
+          const reply = await state.offlineEngine.chatCompletion({
+            messages:[{role:"user",content:prompt}],
+            stream:false
           });
-          if(!res.ok) throw new Error("HTTP "+res.status);
-          const data=await res.json();
-          const msg=data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-          return msg?msg.trim():null;
-        }catch(e){
-          logLine("[online LLM error] "+e.message);
+          const text = reply?.choices?.[0]?.message?.content || "";
+          return text.trim() || null;
+        }catch{
           return null;
         }
       }
-
-      // VOICE
-      let cachedVoices=[];
-      if("speechSynthesis" in window){
-        cachedVoices=window.speechSynthesis.getVoices()||[];
-        window.speechSynthesis.onvoiceschanged=()=>{
-          cachedVoices=window.speechSynthesis.getVoices()||[];
-        };
-      }
-      function speakText(text,force){
-        if(!("speechSynthesis" in window)) return;
-        if(!text) return;
-        if(!force && !state.voiceOn) return;
+      async function callOnlineLLM(prompt){
+        const {endpoint,model,key} = state.apiConfig;
+        if(!endpoint || !model || !key) return null;
         try{
-          window.speechSynthesis.cancel();
-          const u=new SpeechSynthesisUtterance(text);
-          u.rate=0.95;u.pitch=0.7;
-          let voices=cachedVoices;
-          if(!voices || !voices.length) voices=window.speechSynthesis.getVoices()||[];
-          const pick=voices.find(v=>
-            /male|old|grand|baritone/i.test((v.name||"") + " " + (v.voiceURI||""))
-          ) || voices[0];
-          if(pick) u.voice=pick;
-          window.speechSynthesis.speak(u);
-        }catch{}
-      }
-
-      function reactionText(base){
-        if(state.mode==="teen"){
-          return base.replace("I won’t accept insults.","Let’s be kind, okay?");
+          const resp = await fetch(endpoint,{
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              "Authorization":"Bearer "+key
+            },
+            body:JSON.stringify({
+              model,
+              messages:[{role:"user",content:prompt}],
+              temperature:0.7
+            })
+          });
+          if(!resp.ok) return null;
+          const data = await resp.json();
+          const text = data.choices?.[0]?.message?.content || "";
+          return text.trim() || null;
+        }catch{
+          return null;
         }
-        return base;
       }
-      function faithSoftener(){
-        if(!state.logicFaithSoftener) return "";
-        if(!state.faithSelection.length) return "";
-        return " (Let’s keep words gentle and respectful.)";
-      }
-
-      function getActiveLogic() {
-        const list = state.logicPacks || [];
-        if (!list.length) return null;
-        let idx = state.logicActiveIndex;
-        if (idx == null || idx >= list.length) idx = list.length - 1;
-        return list[idx];
-      }
-      function getRuntimeConfig(){
-        const pack = getActiveLogic();
-        const r = (pack && pack.rules) || {};
-        const cfg = {};
-        cfg.cooldownHits    = r.cooldown && typeof r.cooldown.hits==="number" ? r.cooldown.hits : 3;
-        cfg.cooldownSeconds = r.cooldown && typeof r.cooldown.seconds==="number" ? r.cooldown.seconds : 10;
-        cfg.abuseWords      = Array.isArray(r.abuseWords) && r.abuseWords.length ? r.abuseWords : null;
-        cfg.faithSoftener   = (r.faithSoftener !== false);
-        cfg.mode            = (r.mode==="teen") ? "teen" : "adult";
-        cfg.ui              = r.ui || null;
-        return cfg;
-      }
-      function applyUIFromLogic() {
-        const root = document.documentElement;
-        const runtime = getRuntimeConfig();
-        const ui = runtime.ui;
-        state.mode = runtime.mode;
-        state.logicFaithSoftener = runtime.faithSoftener;
-        if (!ui) {
-          root.style.removeProperty("--accent-color");
-          document.body.classList.remove("theme-golden");
-          if (els.console) els.console.style.boxShadow = "";
-          if (els.faithBubble) els.faithBubble.classList.remove("pulse");
-          return;
-        }
-        if (ui.accentColor) root.style.setProperty("--accent-color", ui.accentColor);
-        else root.style.removeProperty("--accent-color");
-        if (ui.theme === "golden") document.body.classList.add("theme-golden");
-        else document.body.classList.remove("theme-golden");
-        if (ui.consoleGlow && els.console)
-          els.console.style.boxShadow = "0 0 25px rgba(34,197,94,.35)";
-        else if (els.console)
-          els.console.style.boxShadow = "";
-        if (ui.faithBubblePulse && els.faithBubble)
-          els.faithBubble.classList.add("pulse");
-        else if (els.faithBubble)
-          els.faithBubble.classList.remove("pulse");
-      }
-      function refreshLogicUI(){
-        if(!els.logicBox || !els.logicHint || !els.logicSerial) return;
-        const list = state.logicPacks || [];
-        if(!list.length){
-          els.logicBox.value="";
-          els.logicHint.textContent="No logic pack stored. Paste JSON and press Save to add Logic #1.";
-          els.logicSerial.textContent="none";
-          return;
-        }
-        if(state.logicActiveIndex==null || state.logicActiveIndex>=list.length)
-          state.logicActiveIndex = list.length - 1;
-        const idx = state.logicActiveIndex;
-        const pack = list[idx];
-        const n = list.length;
-        els.logicBox.value="";
-        els.logicHint.textContent =
-          "Stored logic packs: " + n +
-          ". Active logic #" + (idx+1) + " (serial " + pack.serial + "). Box kept empty — use Copy to export JSON.";
-        els.logicSerial.textContent = "Logic #" + (idx+1) + " of " + n;
-      }
-
-      function detectAbuse(text){
-        const t=(text||"").toLowerCase();
-        const runtime = getRuntimeConfig();
-        const basePatterns=["stfu","idiot","dumb","trash","f u","fk you"];
-        const patterns = runtime.abuseWords || basePatterns;
-        const hitBasic=patterns.some(p=>t.includes(p.toLowerCase()));
-        const hateTargets=["muslims","hindus","jews","christians","sikhs","buddhists"];
-        const hitHate=t.includes("i hate") && hateTargets.some(g=>t.includes(g));
-        const hitViolence=t.includes("kill") && (t.includes("them")||t.includes("all"));
-        return {hit:hitBasic||hitHate||hitViolence,hate:hitHate,violence:hitViolence};
-      }
-
-      async function generateAnswer(text){
-        let intelBoost=0, llmBoost=0;
-        const best=findBestIntelMatch(text);
-        if(best){
-          intelBoost=0.25+Math.min(best.score,0.4);
-          let ans=best.item.a;
-          ans=reactionText(ans)+faithSoftener();
-          return {answer:ans,source:"INTEL",intelBoost,llmBoost};
-        }
-        if(state.offlineReady && state.offlineEngine){
-          const offline=await callOfflineLLM(text);
-          if(offline){
-            llmBoost=0.3;
-            let ans=reactionText(offline)+faithSoftener();
-            return {answer:ans,source:"OFFLINE",intelBoost,llmBoost};
-          }
-        }
-        const online=await callOnlineLLM(text);
-        if(online){
-          llmBoost=0.35;
-          let ans=reactionText(online)+faithSoftener();
-          return {answer:ans,source:"ONLINE",intelBoost,llmBoost};
-        }
-        let fb="I heard you, but my LLM engines are offline. Configure LLM or teach me via Intelligence for better answers.";
-        fb=reactionText(fb)+faithSoftener();
-        return {answer:fb,source:"BASIC",intelBoost,llmBoost};
-      }
-
-      function maybeTriggerFaithBubble(userText,answer){
-        if(!state.faithSelection.length) return;
-        const combined=(userText+" "+answer).toLowerCase();
-        const longEnough=userText.length>120 || answer.length>160;
-        const emotionalWords=["death","life","fear","hope","dream","future","family","loss","grief","pray","dua","prayer"];
-        const emoHit=emotionalWords.some(w=>combined.includes(w));
-        if(!(longEnough||emoHit)) return;
-        const names=state.faithSelection.map(id=>{
-          const o=FAITH_OPTIONS.find(x=>x.id===id);
-          return o?o.label:id;
-        }).join(" + ");
-        els.faithBubbleTitle.textContent="Faith reflection bubble";
-        els.faithBubbleMeta.textContent="Tap to see "+(names||"selected")+" literature suggestion.";
-        if(state.faithBubbleTimer) clearTimeout(state.faithBubbleTimer);
-        els.faithBubble.classList.add("show");
-        state.lastStoryInput = userText || answer || "";
-        state.lastStoryBMId = null;
-        speakText("Faith suggestion available. Tap the golden bubble if you want a short reflection.",false);
-        state.faithBubbleTimer=setTimeout(()=>{
-          els.faithBubble.classList.remove("show");
-        },5000);
-      }
-      function openFaithArticleFromBubble(){
-        const primary=state.faithSelection[0]||null;
-        let entry=null;
-        if(primary && FAITH_LIBRARY[primary] && FAITH_LIBRARY[primary].length)
-          entry=FAITH_LIBRARY[primary][0];
-        if(!entry){
-          entry={
-            title:"Generic encouragement",
-            short:"",
-            content:"This is a placeholder. Here you can write your own reflection from your tradition."
-          };
-        }
-        state.currentFaithArticle=entry;
-        els.faithArticleTitle.textContent=entry.title;
-        els.faithArticleText.value=entry.content;
-        const names=state.faithSelection.map(id=>{
-          const o=FAITH_OPTIONS.find(x=>x.id===id);
-          return o?o.label:id;
-        }).join(" + ") || "ethics only";
-        els.faithArticleMeta.textContent="Faith lens: "+names;
-        showModal("modalFaithArticle");
-      }
-      function linkFaithArticleToBM(){
-        const text=(els.faithArticleText.value||"").trim();
-        if(!text){ alert("Nothing to add into BM."); return; }
-        const bmId=ensureBMForLastStory();
-        if(!bmId){ alert("No linked BM story. Tell a story first."); return; }
-        const bm=state.bmPrompts.find(x=>x.id===bmId);
-        if(!bm) return;
-        bm.text=(bm.text||"")+"\n\n[Faith reflection]\n"+text;
-        bm.ts=Date.now();
-        saveBM();renderBMList();hideModal("modalFaithArticle");
-        els.faithBubble.classList.remove("show");
-        recomputeBMMetric();updateCapsule();
-      }
-
-      function copyText(text){
-        if(!navigator.clipboard){ alert("Clipboard not available."); return; }
-        navigator.clipboard.writeText(text).catch(()=>{});
-      }
-
-      function hasLastPair(){
-        return !!(state.lastUserQ && state.lastAuraA);
-      }
-
-      /* small-talk / story detection for auto BM */
-      function isGreetingText(t){
-        const low = (t||"").toLowerCase().trim();
-        const shortNoPunc = low.replace(/[^\w\s]/g," ");
-        const patterns = [
-          "hi","hello","hey",
-          "salam","salaam","assalam o alaikum","assalamualaikum","assalamu alaikum",
-          "good morning","good night","how are you","kia hal","kese ho","kese hain"
-        ];
-        return patterns.some(p=>shortNoPunc.includes(p));
-      }
-      function countMeaningfulSentences(t){
-        const parts = (t||"").split(/[\.!\?؟\n]+/).map(s=>s.trim()).filter(s=>s.length>20);
-        return parts.length;
-      }
-      function maybeAutoStoryBMFromUser(text){
-        const trimmed=(text||"").trim();
-        if(!trimmed) return;
-        if(isGreetingText(trimmed)) return;
-
-        const sentences = countMeaningfulSentences(trimmed);
-        if(sentences < 4) return; // کم از کم 4 معنی خیز جملے
-
-        // اگر پہلے سے live BM ہے تو اسی میں add کر دیں
-        const live = getActiveLiveBM();
-        if(live){
-          const stamp = new Date().toLocaleString();
-          live.text = (live.text||"") + "\n\n[User story @ "+stamp+"]\n" + trimmed;
-          live.summary = live.text.slice(0,180);
-          live.repeatCount = (live.repeatCount || 0) + 1;
-          if(live.repeatCount >= 1) live.keep = true;
-          if(live.repeatCount >= 3) live.locked = true;
-          live.ts = Date.now();
-          saveBM();
-          renderBMList();
-          if(currentBMId===live.id) openBM(live.id);
-          recomputeBMMetric();
-          updateCapsule();
-          state.lastStoryInput = trimmed;
-          state.lastStoryBMId = live.id;
-          return;
-        }
-
-        // نیا BM story prompt بنائیں (24h live)
-        const id = "bm_"+Date.now();
-        const now = Date.now();
-        const obj = {
-          id,
-          title: "Story @ " + new Date().toLocaleString(),
-          summary: trimmed.slice(0,180),
-          text: trimmed,
-          locked: false,
-          ts: now,
-          createdAt: now,
-          live: true,
-          liveUntil: now + 24*60*60*1000,
-          repeatCount: 0,
-          keep: false
-        };
-        state.bmPrompts.push(obj);
-        state.lastStoryInput = trimmed;
-        state.lastStoryBMId = id;
-        saveBM();
-        renderBMList();
-        recomputeBMMetric();
-        updateCapsule();
-      }
-
-      async function handleUserMessage(){
-        const text=(els.userInput.value||"").trim();
-        if(!text) return;
-        const now=Date.now();
-        const runtime=getRuntimeConfig();
-        if(state.cooldownUntil && now<state.cooldownUntil){
-          const sec=Math.ceil((state.cooldownUntil-now)/1000);
-          logLine("Please wait "+sec+"s and then speak calmly.");
-          speakText("Please wait. Let's restart calmly.",false);
-          return;
-        }
-        els.userInput.value="";
-        addHistory("user",text);renderHistory();
-        appendChat("user", text);
-        state.metrics.TM = scoreTM(text);
-        recomputeBMMetric();updateCapsule();
-
-        // auto story BM for long meaningful text
-        maybeAutoStoryBMFromUser(text);
-
-        const abuse=detectAbuse(text);
-        if(abuse.hit){
-          state.abuseCount=(state.abuseCount||0)+1;
-          if(state.abuseCount>=runtime.cooldownHits){
-            state.cooldownUntil=Date.now()+runtime.cooldownSeconds*1000;
-            state.abuseCount=0;
-            logLine("Cooldown activated for "+runtime.cooldownSeconds+" seconds.");
-            speakText("Cooldown activated. I will help when we stay respectful.",false);
-            return;
-          }
-        }else{
-          state.abuseCount=Math.max(0,(state.abuseCount||0)-1);
-        }
-
-        const {answer,source,intelBoost,llmBoost}=await generateAnswer(text);
-        state.lastAnswerSource=source;
-        state.lastUserQ = text;
-        state.lastAuraA = answer;
-        recomputeE0(intelBoost,llmBoost);updateCapsule();
-        addHistory("aura",answer);renderHistory();
-        appendChat("aura", answer);
-        speakText(answer,false);
-        maybeTriggerFaithBubble(text,answer);
-        maybeUpdateLiveBM(text,answer);
-      }
-
-      function setIdentityEditable(editable){
-        [els.uName,els.uNick,els.uOrigin,els.uPlace,els.uProfession,
-         els.uEmotionalStyle,els.uKeyPeople,els.uLegacyRules]
-         .forEach(f=>{ if(f) f.readOnly=!editable; });
-      }
-      function loadIdentityForm(){
-        const u=state.userIdentity||{};
-        els.uName.value=u.name||"";
-        els.uNick.value=u.nick||"";
-        els.uOrigin.value=u.origin||"";
-        els.uPlace.value=u.place||"";
-        els.uProfession.value=u.profession||"";
-        els.uEmotionalStyle.value=u.emotionalStyle||"";
-        els.uKeyPeople.value=u.keyPeople||"";
-        els.uLegacyRules.value=u.legacyRules||"";
-      }
-      function readIdentityForm(){
-        state.userIdentity={
-          name:els.uName.value||"",
-          nick:els.uNick.value||"",
-          origin:els.uOrigin.value||"",
-          place:els.uPlace.value||"",
-          profession:els.uProfession.value||"",
-          emotionalStyle:els.uEmotionalStyle.value||"",
-          keyPeople:els.uKeyPeople.value||"",
-          legacyRules:els.uLegacyRules.value||"",
-          ts:Date.now()
-        };
-        saveUserIdentity();
-      }
-
-      function applyCfg(cfg){
-        if(!cfg) return;
-        state.voiceOn=!!cfg.voiceOn;
-        state.learningOn=cfg.learningOn!==false;
-        state.faithSelection=Array.isArray(cfg.faithSelection)?cfg.faithSelection:[];
-        state.apiConfig=cfg.apiConfig || {endpoint:"",model:"",key:""};
-        state.offlineReady=!!cfg.offlineReady;
-        els.voicePill.textContent=state.voiceOn?"on":"off";
-        els.voicePill.className=state.voiceOn?"pillOn":"pillOff";
-        els.learnPill.textContent=state.learningOn?"on":"off";
-        els.learnPill.className=state.learningOn?"pillOn":"pillOff";
-        if(state.apiConfig.endpoint) els.apiEndpoint.value=state.apiConfig.endpoint;
-        if(state.apiConfig.model) els.apiModel.value=state.apiConfig.model;
-        if(state.apiConfig.key) els.apiKey.value=state.apiConfig.key;
-      }
-
-      function pruneBM(){
-        let changed=false;
-        const now=Date.now();
-        const monthMs=30*24*60*60*1000;
-        state.bmPrompts = (state.bmPrompts || []).filter(bm=>{
-          const created = bm.createdAt || bm.ts || now;
-          bm.createdAt = created;
-          if (typeof bm.repeatCount !== "number") bm.repeatCount = 0;
-          if (typeof bm.keep !== "boolean") bm.keep = false;
-          if (typeof bm.locked !== "boolean") bm.locked = !!bm.locked;
-
-          if (bm.locked) return true;
-          if (bm.repeatCount >= 1 || bm.keep) {
-            bm.keep = true;
-            return true;
-          }
-          if (now - created > monthMs) {
-            changed=true;
-            return false;
-          }
-          return true;
-        });
-        if(changed) saveBM();
-      }
-
-      function initFromStorage(){
-        const cfg=safeLoadJSON(KEY_CFG,null);
-        const intel=safeLoadJSON(KEY_INT,[]);
-        const bm=safeLoadJSON(KEY_BM,[]);
-        const hist=safeLoadJSON(KEY_HIST,[]);
-        const user=safeLoadJSON(KEY_USER,null);
-        const logicRaw=safeLoadJSON(KEY_LOGIC,null);
-        if(cfg) applyCfg(cfg);
-        state.intelligence=Array.isArray(intel)?intel:[];
-        state.bmPrompts=Array.isArray(bm)?bm:[];
-        state.history=Array.isArray(hist)?hist:[];
-        state.history.forEach(h=>{ if(typeof h.locked!=="boolean") h.locked=false; });
-        state.userIdentity=user;
-        if(logicRaw && Array.isArray(logicRaw.list)){
-          state.logicPacks=logicRaw.list;
-          state.logicActiveIndex=typeof logicRaw.activeIndex==="number"
-            ? logicRaw.activeIndex : (state.logicPacks.length?state.logicPacks.length-1:null);
-        }else if(logicRaw && logicRaw.serial){
-          state.logicPacks=[{
-            serial: logicRaw.serial,
-            rules: logicRaw.rules || {},
-            ts: logicRaw.ts || Date.now()
-          }];
-          state.logicActiveIndex=0;
-        }else{
-          state.logicPacks=[];
-          state.logicActiveIndex=null;
-        }
-        renderFaithChips();
-        renderIntelList();
-        pruneBM();
-        renderBMList();
-        renderHistory();
-        loadIdentityForm();
-        setIdentityEditable(false);
-        recomputeBMMetric();
-        updateCapsule();
-        refreshLogicUI();
-        applyUIFromLogic();
-      }
-
-      // EVENTS
-      els.btnOptions.addEventListener("click",()=>{
-        els.optionsMenu.classList.toggle("show");
-      });
-      document.addEventListener("click",(e)=>{
-        if(!els.optionsMenu.contains(e.target) && !els.btnOptions.contains(e.target))
-          els.optionsMenu.classList.remove("show");
-      });
-
+      /* Options */
+      els.btnOptions.addEventListener("click",()=>{ els.optionsMenu.classList.toggle("show"); });
       els.miVoice.addEventListener("click",()=>{
-        state.voiceOn=!state.voiceOn;
-        els.voicePill.textContent=state.voiceOn?"on":"off";
-        els.voicePill.className=state.voiceOn?"pillOn":"pillOff";
+        state.voiceOn = !state.voiceOn;
+        els.voicePill.textContent = state.voiceOn ? "on" : "off";
+        els.voicePill.className = state.voiceOn ? "pillOn" : "pillOff";
         saveCfg();
       });
       els.miLearn.addEventListener("click",()=>{
-        state.learningOn=!state.learningOn;
-        els.learnPill.textContent=state.learningOn?"on":"off";
-        els.learnPill.className=state.learningOn?"pillOn":"pillOff";
+        state.learningOn = !state.learningOn;
+        els.learnPill.textContent = state.learningOn ? "on" : "off";
+        els.learnPill.className = state.learningOn ? "pillOn" : "pillOff";
         saveCfg();
       });
-      els.miFaith.addEventListener("click",()=>showModal("modalFaith"));
-      els.miIntel.addEventListener("click",()=>showModal("modalIntel"));
-      els.miSeed.addEventListener("click",()=>showModal("modalSeed"));
-      els.miLLM.addEventListener("click",()=>showModal("modalLLM"));
-      els.miBMRecall.addEventListener("click",()=>showModal("modalBM"));
-      els.miHistory.addEventListener("click",()=>showModal("modalHistory"));
-      els.miIdentity.addEventListener("click",()=>{
-        loadIdentityForm();
-        setIdentityEditable(false);
-        showModal("modalIdentity");
-      });
-
-      els.sendBtn.addEventListener("click",handleUserMessage);
-      els.userInput.addEventListener("keydown",(e)=>{
-        if(e.key==="Enter" && !e.shiftKey){
-          e.preventDefault();handleUserMessage();
-        }
-      });
-
-      els.intelSearch.addEventListener("input",renderIntelList);
-      els.btnIntelSave.addEventListener("click",()=>{
-        if(!state.editingIntelId) return;
-        const q=(els.intelEditQ.value||"").trim();
-        const a=(els.intelEditA.value||"").trim();
-        if(!q||!a){ alert("Question and answer required."); return; }
-        const idx=state.intelligence.findIndex(x=>x.id===state.editingIntelId);
-        if(idx>=0){
-          state.intelligence[idx].q=q;
-          state.intelligence[idx].a=a;
-          saveIntelligence();renderIntelList();
-        }
-        closeIntelEditor();
-      });
-      els.btnIntelCancel.addEventListener("click",closeIntelEditor);
-
-      els.btnParseSeed.addEventListener("click",parseSeedBlock);
-      els.btnSaveSeed.addEventListener("click",saveParsedSeed);
-      els.btnDiscardSeed.addEventListener("click",discardSeed);
-
-      if(els.btnValidateLogic){
-        els.btnValidateLogic.addEventListener("click",()=>{
-          const raw=els.logicBox.value||"";
-          if(!raw.trim()){ els.logicHint.textContent="Nothing to validate."; return; }
-          try{
-            const obj=JSON.parse(raw);
-            const keys=Object.keys(obj||{});
-            els.logicHint.textContent="Valid JSON with "+keys.length+" root key(s).";
-          }catch(e){
-            els.logicHint.textContent="Invalid JSON: "+e.message;
-          }
-        });
-      }
-      if(els.btnSaveLogic){
-        els.btnSaveLogic.addEventListener("click",()=>{
-          const raw=els.logicBox.value||"";
-          if(!raw.trim()){ els.logicHint.textContent="Nothing to save.";return; }
-          let obj;
-          try{ obj=JSON.parse(raw); }
-          catch(e){ els.logicHint.textContent="Invalid JSON: "+e.message;return; }
-          if(!confirm("Save this logic pack? It will control behaviour until you delete it.")) return;
-          const serial="LP-"+new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14);
-          const pack={ serial, rules:obj, ts:Date.now() };
-          state.logicPacks = state.logicPacks || [];
-          state.logicPacks.push(pack);
-          state.logicActiveIndex = state.logicPacks.length-1;
-          persistLogicState();
-          refreshLogicUI();
-          applyUIFromLogic();
-          els.logicBox.value="";
-        });
-      }
-      if(els.btnCopyLogic){
-        els.btnCopyLogic.addEventListener("click",()=>{
-          const list=state.logicPacks||[];
-          if(list.length){
-            const idx = state.logicActiveIndex==null ? (list.length-1) : state.logicActiveIndex;
-            const pack=list[idx];
-            const text="// Logic #"+(idx+1)+" of "+list.length+
-              ", serial: "+pack.serial+"\n"+JSON.stringify(pack.rules,null,2);
-            copyText(text);
-            els.logicHint.textContent="Active logic #"+(idx+1)+" copied with serial.";
-          }else{
-            const raw=els.logicBox.value||"";
-            if(!raw.trim()){ els.logicHint.textContent="No logic or text to copy.";return; }
-            copyText(raw);
-            els.logicHint.textContent="Current box text copied (no stored pack).";
-          }
-        });
-      }
-      if(els.btnDeleteLogic){
-        els.btnDeleteLogic.addEventListener("click",()=>{
-          const list=state.logicPacks||[];
-          if(!list.length && !(els.logicBox.value||"").trim()){
-            els.logicHint.textContent="No logic pack to delete.";return;
-          }
-          if(!confirm("Delete active logic pack?")) return;
-          if(!confirm("Are you sure? This cannot be undone.")) return;
-          if(list.length){
-            const idx= state.logicActiveIndex==null ? (list.length-1) : state.logicActiveIndex;
-            list.splice(idx,1);
-            if(!list.length){
-              state.logicActiveIndex=null;
-            }else if(idx>=list.length){
-              state.logicActiveIndex=list.length-1;
-            }else{
-              state.logicActiveIndex=idx;
-            }
-            state.logicPacks=list;
-            persistLogicState();
-          }
-          els.logicBox.value="";
-          els.logicHint.textContent="Logic pack deleted.";
-          els.logicSerial.textContent="none";
-          applyUIFromLogic();
-        });
-      }
-
-      els.btnLoadOffline.addEventListener("click",initOfflineEngine);
-      els.btnSaveLLM.addEventListener("click",()=>{
-        state.apiConfig={
-          endpoint:els.apiEndpoint.value.trim(),
-          model:els.apiModel.value.trim(),
-          key:els.apiKey.value.trim()
-        };
-        saveCfg();
-        logLine("[LLM] Online helper settings saved.");
-      });
-
-      if(els.btnUnlockBM){
-        els.btnUnlockBM.addEventListener("click",()=>{
-          if(!currentBMId) return;
-          if(!confirm("Unlock this BM prompt for editing?")) return;
-          const bm=state.bmPrompts.find(x=>x.id===currentBMId);
-          if(!bm) return;
-          bm.locked=false;saveBM();openBM(currentBMId);
-        });
-      }
-      if(els.btnLiveBM){
-        els.btnLiveBM.addEventListener("click",()=>{
-          if(!currentBMId) return;
-          const bm=state.bmPrompts.find(x=>x.id===currentBMId);
-          if(!bm) return;
-          const now=Date.now();
-          if(!bm.live || !bm.liveUntil || bm.liveUntil<=now){
-            bm.live=true;bm.liveUntil=now+24*60*60*1000;
-          }else{
-            bm.live=false;bm.liveUntil=null;
-          }
-          saveBM();openBM(currentBMId);
-        });
-      }
-
-      els.btnCopyPrompt.addEventListener("click",()=>{
-        const txt=els.bmTextArea.value||""; if(!txt) return; copyText(txt);
-        showToast("Copied");
-        if(currentBMId){
-          const bm=state.bmPrompts.find(x=>x.id===currentBMId);
-          if(bm){
-            bm.repeatCount = (bm.repeatCount || 0) + 1;
-            if (bm.repeatCount >= 1) bm.keep = true;
-            if (bm.repeatCount >= 3) bm.locked = true;
-            bm.ts = Date.now();
-            saveBM();
-            renderBMList();
-            openBM(currentBMId);
-          }
-        }
-      });
-      els.btnAutoGen.addEventListener("click",()=>{
-        logLine("[BM] Auto generation can be wired later.");
-      });
-      els.btnDeletePrompt.addEventListener("click",()=>{
-        if(!currentBMId) return;
-        if(!confirm("Delete this BM prompt?")) return;
-        if(!confirm("Are you sure? This cannot be undone.")) return;
-        state.bmPrompts = state.bmPrompts.filter(x=>x.id!==currentBMId);
-        saveBM();renderBMList();els.bmViewer.style.display="none";currentBMId=null;
-        recomputeBMMetric();updateCapsule();
-      });
-      if(els.bmSearch){
-        els.bmSearch.addEventListener("input",renderBMList);
-      }
-      if(els.bmDate){
-        els.bmDate.addEventListener("change",renderBMList);
-      }
-
+      els.miFaith.addEventListener("click",()=>openModal(els.modalFaith));
+      els.miIntel.addEventListener("click",()=>openModal(els.modalIntel));
+      els.miSeed.addEventListener("click",()=>openModal(els.modalSeed));
+      els.miLLM.addEventListener("click",()=>openModal(els.modalLLM));
+      els.miBMRecall.addEventListener("click",()=>openModal(els.modalBM));
+      els.miHistory.addEventListener("click",()=>{renderHistory();openModal(els.modalHistory);});
+      els.miIdentity.addEventListener("click",()=>{loadIdentityIntoForm();openModal(els.modalIdentity);});
+      /* History buttons */
       els.btnDeleteRecent.addEventListener("click",()=>{
-        if(!confirm("Delete history for last 48h? Locked items stay.")) return;
         const cutoff = Date.now() - 48*60*60*1000;
-        state.history = state.history.filter(h => h.locked || h.ts < cutoff);
-        saveHistory();renderHistory();
+        state.history = state.history.filter(h=>h.locked || h.ts < cutoff);
+        saveHistory();
+        renderHistory();
       });
       els.btnDeleteAllHist.addEventListener("click",()=>{
-        if(!confirm("Delete ALL unlocked history? Locked items stay.")) return;
-        if(!confirm("Are you completely sure?")) return;
+        if(!confirm("Delete all history (except locked)?")) return;
         state.history = state.history.filter(h=>h.locked);
-        saveHistory();renderHistory();
+        saveHistory();
+        renderHistory();
       });
       els.btnCopyHistory.addEventListener("click",()=>{
-        const lines=state.history.map(h=>{
-          const dt=new Date(h.ts).toISOString();
-          const label=h.role==="user"?"You":(h.role==="aura"?"AURA":h.role);
-          return `[${dt}] ${label}: ${h.text}${h.locked ? " [locked]" : ""}`;
+        const text = state.history.map(h=>{
+          const dt = new Date(h.ts).toLocaleString();
+          const label = h.role==="user" ? "You" : (h.role==="aura" ? "AURA" : h.role);
+          return `[${dt}] ${label}: ${h.text}`;
         }).join("\n");
-        if(!lines) return; copyText(lines);
+        navigator.clipboard?.writeText(text);
         showToast("History copied");
       });
-
-      els.btnEditIdentity.addEventListener("click",()=>setIdentityEditable(true));
-      els.btnSaveUserIdentity.addEventListener("click",()=>{
-        readIdentityForm();setIdentityEditable(false);logLine("[identity] Saved on this device.");
-      });
-      els.btnDeleteUserIdentity.addEventListener("click",()=>{
-        if(!confirm("Delete stored identity?")) return;
-        if(!confirm("Are you sure? This cannot be undone.")) return;
-        state.userIdentity=null;saveUserIdentity();
-        loadIdentityForm();setIdentityEditable(false);
-      });
-
-      els.faithBubble.addEventListener("click",e=>{
-        if(e.target===els.faithBubbleClose){
-          els.faithBubble.classList.remove("show");return;
+      /* Image preview */
+      if(els.visionInput){
+        els.visionInput.addEventListener("change",()=>{
+          const input = els.visionInput;
+          if(input.files && input.files[0]){
+            const reader = new FileReader();
+            reader.onload = function(e){
+              els.imgPrev.src = e.target.result;
+              els.imagePreviewArea.style.display = "block";
+              logLine("sys","[Vision] Image attached. Meaning extraction is a future module.");
+            };
+            reader.readAsDataURL(input.files[0]);
+          }
+        });
+      }
+      /* Main chat + self-learning pipeline */
+      async function handleSend(){
+        const raw = els.userInput.value;
+        const text = raw.trim();
+        if(!text) return;
+        els.userInput.value = "";
+        els.optionsMenu.classList.remove("show");
+        if(state.correcting){
+          const correctA = text;
+          if(state.lastUserQ && correctA){
+            const id = "intel_"+Date.now();
+            state.intelligence.push({ id, q: state.lastUserQ, a: correctA, ts: Date.now() });
+            saveIntelligence();
+            renderIntelligence(els.intelSearch.value);
+            logLine("sys","[Self-learning] Stored corrected answer into intelligence.");
+            showToast("Correct answer stored");
+          }
+          state.correcting = false;
+          return;
         }
-        openFaithArticleFromBubble();
-      });
-      els.btnCopyFaithArticle.addEventListener("click",()=>{
-        const txt=els.faithArticleText.value||""; if(!txt) return; copyText(txt);
-        showToast("Copied");
-      });
-      els.btnAddFaithToBM.addEventListener("click",linkFaithArticleToBM);
-      els.btnSkipFaithBM.addEventListener("click",()=>{
-        hideModal("modalFaithArticle");els.faithBubble.classList.remove("show");
-      });
-
-      /* reaction icons behaviour */
-      if(els.btnCopyLast){
-        els.btnCopyLast.addEventListener("click",()=>{
-          if(!hasLastPair()){ logLine("No recent answer to copy."); return; }
-          copyText(state.lastAuraA);
-          showToast("Copied");
-        });
+        logLine("user","You: "+text);
+        registerActivity();
+        const now = Date.now();
+        if(state.cooldownUntil && now < state.cooldownUntil){
+          logLine("sys","[Cooldown] Please wait a moment before sending more messages.");
+          return;
+        }
+        state.metrics.TM = scoreTM(text);
+        recomputeBMMetric();
+        let intelBoost = 0, llmBoost = 0;
+        let answer = null;
+        let source = "none";
+        const tLower = text.toLowerCase();
+        let bestMatch = state.intelligence.find(p=>p.q.toLowerCase()===tLower);
+        if(!bestMatch){
+          bestMatch = state.intelligence.find(p=>tLower.includes(p.q.toLowerCase()) || p.q.toLowerCase().includes(tLower));
+        }
+        if(bestMatch){
+          answer = bestMatch.a;
+          source = "intelligence";
+          intelBoost = 0.35;
+        }
+        if(!answer && state.seedPairs.length){
+          let sMatch = state.seedPairs.find(p=>p.q.toLowerCase()===tLower);
+          if(!sMatch){
+            sMatch = state.seedPairs.find(p=>tLower.includes(p.q.toLowerCase()) || p.q.toLowerCase().includes(tLower));
+          }
+          if(sMatch){
+            answer = sMatch.a;
+            source = "seed";
+            intelBoost = 0.25;
+          }
+        }
+        if(!answer && state.offlineReady){
+          answer = await callOfflineLLM(text);
+          if(answer){
+            source = "offline";
+            llmBoost = 0.25;
+          }
+        }
+        if(!answer){
+          answer = await callOnlineLLM(text);
+          if(answer){
+            source = "online";
+            llmBoost = 0.30;
+          }
+        }
+        if(!answer){
+          answer = "I don't have a stored answer yet. You can teach me using the 👎 button or by adding LaTeX blocks under Feed the seed.";
+          source = "fallback";
+        }
+        state.lastUserQ = text;
+        state.lastAuraA = answer;
+        state.lastAnswerSource = source;
+        recomputeE0(intelBoost, llmBoost);
+        updateCapsule();
+        logLine("aura","AURA: "+answer+"  (source: "+source+")");
+        if(state.voiceOn){
+          try{
+            const u = new SpeechSynthesisUtterance(answer);
+            const e0 = state.metrics.E0;
+            let rate = 1, pitch = 1;
+            if(e0 > 0.3){
+              const t = Math.min((e0-0.3)*2,1);
+              rate = 1.05 + 0.3*t;
+              pitch = 1.05 + 0.3*t;
+            }else if(e0 < -0.3){
+              const t = Math.min((Math.abs(e0)-0.3)*2,1);
+              rate = 0.95 - 0.25*t;
+              pitch = 0.95 - 0.35*t;
+            }
+            u.rate = Math.max(0.6,Math.min(rate,1.6));
+            u.pitch = Math.max(0.5,Math.min(pitch,1.8));
+            speechSynthesis.speak(u);
+          }catch{}
+        }
+        // After first answer with faith ON -> golden bar flies to top
+        if(state.faithSelection.length && state.faithFlightPending && !state.faithFlightDone){
+          startFaithFlight();
+        }
+        updateEthicBar(text);
       }
-      if(els.btnLikeLast){
-        els.btnLikeLast.addEventListener("click",()=>{
-          if(!hasLastPair()){ logLine("No recent answer to save."); return; }
-          if(!state.learningOn){
-            logLine("Learning is OFF. Turn Learning → ON in Options to save answers.");
+      els.sendBtn.addEventListener("click",handleSend);
+      els.userInput.addEventListener("keydown",e=>{
+        if(e.key==="Enter" && !e.shiftKey){
+          e.preventDefault();
+          handleSend();
+        }
+      });
+      function interceptIncorrect(text){
+        return text.trim().toLowerCase()==="incorrect";
+      }
+      els.userInput.addEventListener("keydown",e=>{
+        if(e.key==="Enter" && !e.shiftKey){
+          const val = els.userInput.value.trim();
+          if(interceptIncorrect(val) && state.lastUserQ && state.lastAuraA){
+            e.preventDefault();
+            els.userInput.value = "";
+            logLine("user","You: incorrect");
+            logLine("sys","[Self-learning] Please type the correct answer for the last question.");
+            state.correcting = true;
             return;
           }
-          const id="intel_"+Date.now()+"_"+Math.random().toString(16).slice(2);
-          const meta="[user-like] source="+(state.lastAnswerSource||"unknown")+"; E0="+state.metrics.E0.toFixed(3);
-          state.intelligence.push({id,q:state.lastUserQ,a:state.lastAuraA,meta});
-          saveIntelligence();
-          renderIntelList();
-          showToast("Saved");
-        });
-      }
-      if(els.btnDislikeLast){
-        els.btnDislikeLast.addEventListener("click",()=>{
-          if(!hasLastPair()){ logLine("No recent answer to correct."); return; }
-          if(!state.learningOn){
-            logLine("Learning is OFF. Turn Learning → ON in Options to correct answers.");
-            return;
+        }
+      });
+      /* Reaction buttons */
+      els.btnLikeLast.addEventListener("click",()=>{
+        if(!state.lastUserQ || !state.lastAuraA){
+          showToast("No last answer to save");
+          return;
+        }
+        const already = state.intelligence.find(p=>p.q===state.lastUserQ && p.a===state.lastAuraA);
+        if(already){
+          showToast("Already in intelligence");
+          return;
+        }
+        const id = "intel_"+Date.now();
+        state.intelligence.push({id,q:state.lastUserQ,a:state.lastAuraA,ts:Date.now()});
+        saveIntelligence();
+        renderIntelligence(els.intelSearch.value);
+        showToast("Saved to intelligence");
+      });
+      els.btnDislikeLast.addEventListener("click",()=>{
+        if(!state.lastUserQ || !state.lastAuraA){
+          showToast("No last answer");
+          return;
+        }
+        logLine("sys","[Self-learning] Type the correct answer in chat. It will replace the last one.");
+        state.correcting = true;
+      });
+      els.btnSpeakLast.addEventListener("click",()=>{
+        if(!state.lastAuraA){
+          showToast("No last answer");
+          return;
+        }
+        try{
+          const u = new SpeechSynthesisUtterance(state.lastAuraA);
+          speechSynthesis.speak(u);
+        }catch{}
+      });
+      els.btnShareLast.addEventListener("click",()=>{
+        if(!state.lastUserQ || !state.lastAuraA){
+          showToast("No last pair");
+          return;
+        }
+        const text = `Q: ${state.lastUserQ}\nA: ${state.lastAuraA}`;
+        navigator.clipboard?.writeText(text);
+        showToast("Question + answer copied");
+      });
+      document.addEventListener("click", ()=>registerActivity(), true);
+      document.addEventListener("keydown", ()=>registerActivity(), true);
+      /* Load from localStorage on start */
+      function initFromStorage(){
+        const cfg = safeLoadJSON(KEY_CFG,null);
+        if(cfg){
+          state.voiceOn = !!cfg.voiceOn;
+          state.learningOn = cfg.learningOn!==false;
+          state.faithSelection = cfg.faithSelection||[];
+          state.faithLiveOptions = cfg.faithLiveOptions || {};
+          state.apiConfig = cfg.apiConfig||state.apiConfig;
+          state.offlineReady = !!cfg.offlineReady;
+          if(cfg.dream){
+            state.dreamEnabled = !!cfg.dream.enabled;
+            state.dreamDelayMs = cfg.dream.delayMs || state.dreamDelayMs;
           }
-          const replacement = prompt("Type the correct answer I should learn for this question:", "");
-          if(!replacement || !replacement.trim()){
-            return;
-          }
-          const id="intel_"+Date.now()+"_"+Math.random().toString(16).slice(2);
-          const meta="[user-corrected] source="+(state.lastAnswerSource||"unknown")+"; E0="+state.metrics.E0.toFixed(3);
-          state.intelligence.push({id,q:state.lastUserQ,a:replacement.trim(),meta});
-          saveIntelligence();
-          renderIntelList();
-          showToast("Updated");
-        });
+        }
+        els.voicePill.textContent = state.voiceOn ? "on" : "off";
+        els.voicePill.className = state.voiceOn ? "pillOn" : "pillOff";
+        els.learnPill.textContent = state.learningOn ? "on" : "off";
+        els.learnPill.className = state.learningOn ? "pillOn" : "pillOff";
+        state.intelligence = safeLoadJSON(KEY_INT,[]);
+        state.bmPrompts = safeLoadJSON(KEY_BM,[]);
+        state.history = safeLoadJSON(KEY_HIST,[]);
+        state.userIdentity = safeLoadJSON(KEY_USER,null);
+        const logicStored = safeLoadJSON(KEY_LOGIC,null);
+        if(logicStored){
+          state.logicPacks = logicStored.list||[];
+          state.logicActiveIndex = logicStored.activeIndex;
+          if(state.logicActiveIndex!=null) applyLogicPack(state.logicActiveIndex);
+        }
+        if(state.apiConfig.endpoint) els.apiEndpoint.value = state.apiConfig.endpoint;
+        if(state.apiConfig.model) els.apiModel.value = state.apiConfig.model;
+        if(state.apiConfig.key) els.apiKey.value = state.apiConfig.key;
+        renderFaithChips();
+        onFaithChanged();
+        renderIntelligence("");
+        renderBMList();
+        renderHistory();
+        loadIdentityIntoForm();
+        recomputeBMMetric();
+        recomputeE0(0,0);
+        updateCapsule();
+        updateDreamUI();
+        scheduleDreamTimer();
+        setEthicText(ETHIC_BASE,""); // ✅ no meta
       }
-      if(els.btnSpeakLast){
-        els.btnSpeakLast.addEventListener("click",()=>{
-          if(!hasLastPair()){ logLine("No recent answer to speak."); return; }
-          speakText(state.lastAuraA,true);
-        });
-      }
-      if(els.btnShareLast){
-        els.btnShareLast.addEventListener("click",()=>{
-          if(!hasLastPair()){ logLine("No recent pair to copy."); return; }
-          const block="Q: "+state.lastUserQ+"\nA: "+state.lastAuraA;
-          copyText(block);
-          showToast("Copied");
-        });
-      }
-
       initFromStorage();
-      // console clean start; no auto welcome line
+      logLine("sys","AURA-X Ω ready. TM = your inputs only; everything else stays on this device.");
     });
   </script>
 </body>
