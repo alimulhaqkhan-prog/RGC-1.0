@@ -121,7 +121,7 @@ J(t) = |E0(t) − E0(t−1)|
 
 After enabling GitHub Pages:
 
-https://alimulhaqkhan-prog.github.io/aura-x-omega-v2-trainable-R/
+https://alimulhaqkhan-prog.github.io/aura-x-omega-v2-trainable-R/AURA_X_Omega_Trainable_R.html
 
 ---
 
